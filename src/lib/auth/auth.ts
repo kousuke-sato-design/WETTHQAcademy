@@ -1,0 +1,122 @@
+import bcrypt from 'bcryptjs';
+import type { Client } from '@libsql/client';
+
+export type UserRole = 'master' | 'company_admin' | 'user';
+
+export interface User {
+	id: number;
+	login_id: string;
+	role: UserRole;
+	company_id: number | null;
+	name: string;
+}
+
+export async function verifyCredentials(
+	turso: Client,
+	login_id: string,
+	password: string,
+	expectedRole?: UserRole
+): Promise<User | null> {
+	try {
+		let user: any = null;
+		let passwordHash: string | null = null;
+		let role: UserRole | null = null;
+
+		// ロール指定がある場合は該当するテーブルのみ検索
+		if (expectedRole === 'master') {
+			const result = await turso.execute({
+				sql: 'SELECT id, login_id, password_hash, name FROM admins WHERE login_id = ?',
+				args: [login_id]
+			});
+			if (result.rows.length > 0) {
+				user = result.rows[0];
+				passwordHash = user.password_hash as string;
+				role = 'master';
+			}
+		} else if (expectedRole === 'company_admin') {
+			const result = await turso.execute({
+				sql: 'SELECT id, login_id, password_hash, company_id, name FROM company_admins WHERE login_id = ?',
+				args: [login_id]
+			});
+			if (result.rows.length > 0) {
+				user = result.rows[0];
+				passwordHash = user.password_hash as string;
+				role = 'company_admin';
+			}
+		} else if (expectedRole === 'user') {
+			const result = await turso.execute({
+				sql: 'SELECT id, login_id, password_hash, company_id, name FROM students WHERE login_id = ?',
+				args: [login_id]
+			});
+			if (result.rows.length > 0) {
+				user = result.rows[0];
+				passwordHash = user.password_hash as string;
+				role = 'user';
+			}
+		} else {
+			// ロール指定がない場合は全テーブルを検索
+			const adminResult = await turso.execute({
+				sql: 'SELECT id, login_id, password_hash, name FROM admins WHERE login_id = ?',
+				args: [login_id]
+			});
+			if (adminResult.rows.length > 0) {
+				user = adminResult.rows[0];
+				passwordHash = user.password_hash as string;
+				role = 'master';
+			} else {
+				const companyAdminResult = await turso.execute({
+					sql: 'SELECT id, login_id, password_hash, company_id, name FROM company_admins WHERE login_id = ?',
+					args: [login_id]
+				});
+				if (companyAdminResult.rows.length > 0) {
+					user = companyAdminResult.rows[0];
+					passwordHash = user.password_hash as string;
+					role = 'company_admin';
+				} else {
+					const studentResult = await turso.execute({
+						sql: 'SELECT id, login_id, password_hash, company_id, name FROM students WHERE login_id = ?',
+						args: [login_id]
+					});
+					if (studentResult.rows.length > 0) {
+						user = studentResult.rows[0];
+						passwordHash = user.password_hash as string;
+						role = 'user';
+					}
+				}
+			}
+		}
+
+		if (!user || !passwordHash || !role) {
+			return null;
+		}
+
+		// パスワード検証
+		const isValid = await bcrypt.compare(password, passwordHash);
+		if (!isValid) {
+			return null;
+		}
+
+		return {
+			id: user.id as number,
+			login_id: user.login_id as string,
+			role: role,
+			company_id: (user.company_id as number) || null,
+			name: user.name as string
+		};
+	} catch (error) {
+		console.error('Authentication error:', error);
+		return null;
+	}
+}
+
+export function serializeUser(user: User): string {
+	return JSON.stringify(user);
+}
+
+export function deserializeUser(data: string): User | null {
+	try {
+		return JSON.parse(data);
+	} catch {
+		return null;
+	}
+}
