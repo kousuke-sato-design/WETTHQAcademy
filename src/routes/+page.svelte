@@ -53,31 +53,31 @@
 <div class="min-h-screen bg-white">
 	<!-- ヘッダー -->
 	<header class="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between items-center h-16">
-				<div class="flex items-center space-x-3">
-					<div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
-						<div class="w-6 h-6">
+		<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+			<div class="flex justify-between items-center h-14 sm:h-16">
+				<div class="flex items-center space-x-2 sm:space-x-3">
+					<div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
+						<div class="w-5 h-5 sm:w-6 sm:h-6">
 							{@html getIconSVG('brain')}
 						</div>
 					</div>
 					<div>
-						<h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+						<h1 class="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
 							WEBTHQAcademy
 						</h1>
-						<p class="text-xs text-gray-500">株式会社総合心理教育研究所</p>
+						<p class="hidden sm:block text-xs text-gray-500">株式会社総合心理教育研究所</p>
 					</div>
 				</div>
-				<div class="flex items-center gap-3">
+				<div class="flex items-center gap-2 sm:gap-3">
 					<button
 						on:click={() => goto('/company/login')}
-						class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+						class="hidden sm:block px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
 					>
 						担当者
 					</button>
 					<button
 						on:click={() => goto('/user/login')}
-						class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+						class="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-medium rounded-lg transition-colors shadow-sm"
 					>
 						ログイン
 					</button>
@@ -87,31 +87,31 @@
 	</header>
 
 	<!-- ヒーローセクション -->
-	<section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+	<section class="pt-20 sm:pt-24 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
 		<div class="max-w-7xl mx-auto">
 			<div class="text-center">
-				<div class="inline-block mb-6">
-					<span class="px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 rounded-full text-sm font-semibold border border-blue-200">
+				<div class="inline-block mb-4 sm:mb-6">
+					<span class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 rounded-full text-xs sm:text-sm font-semibold border border-blue-200">
 						THQ受検企業様限定プラットフォーム
 					</span>
 				</div>
-				<h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+				<h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight px-2">
 					メンタルヘルスを<br />
 					<span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
 						動画とPDFで学ぶ
 					</span>
 				</h2>
-				<p class="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-					ストレスチェック制度の実施から職場のメンタルヘルス対策まで、<br />
+				<p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed px-4">
+					ストレスチェック制度の実施から職場のメンタルヘルス対策まで、<br class="hidden sm:block" />
 					実務に必要な知識を体系的に学習できるオンラインプラットフォーム
 				</p>
-				<p class="text-sm text-gray-500 mb-12">
+				<p class="text-xs sm:text-sm text-gray-500 mb-8 sm:mb-12">
 					株式会社総合心理教育研究所のTHQサービスをご利用の企業様専用
 				</p>
-				<div class="flex justify-center gap-4">
+				<div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4">
 					<button
 						on:click={() => goto('/user/login')}
-						class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+						class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
 					>
 						学習を始める →
 					</button>
@@ -119,7 +119,7 @@
 						on:click={() => {
 							document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
 						}}
-						class="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-all shadow-lg border border-gray-200"
+						class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-all shadow-lg border border-gray-200"
 					>
 						詳しく見る
 					</button>
@@ -129,26 +129,26 @@
 	</section>
 
 	<!-- 特徴セクション -->
-	<section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+	<section id="features" class="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
 		<div class="max-w-7xl mx-auto">
-			<div class="text-center mb-16">
-				<h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+			<div class="text-center mb-10 sm:mb-12 md:mb-16">
+				<h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
 					WEBTHQAcademyの特徴
 				</h3>
-				<p class="text-lg text-gray-600">
+				<p class="text-base sm:text-lg text-gray-600">
 					効果的な学習をサポートする4つの特徴
 				</p>
 			</div>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
 				{#each features as feature}
-					<div class="bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow">
-						<div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 text-white">
-							<div class="w-8 h-8">
+					<div class="bg-gradient-to-br from-white to-gray-50 p-6 sm:p-8 rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow">
+						<div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 text-white">
+							<div class="w-6 h-6 sm:w-8 sm:h-8">
 								{@html getIconSVG(feature.icon)}
 							</div>
 						</div>
-						<h4 class="text-xl font-bold text-gray-900 mb-3">{feature.title}</h4>
-						<p class="text-gray-600 leading-relaxed">{feature.description}</p>
+						<h4 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{feature.title}</h4>
+						<p class="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
 					</div>
 				{/each}
 			</div>
@@ -156,27 +156,27 @@
 	</section>
 
 	<!-- コンテンツカテゴリセクション -->
-	<section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50">
+	<section class="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50">
 		<div class="max-w-7xl mx-auto">
-			<div class="text-center mb-16">
-				<h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+			<div class="text-center mb-10 sm:mb-12 md:mb-16">
+				<h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
 					豊富な学習コンテンツ
 				</h3>
-				<p class="text-lg text-gray-600">
+				<p class="text-base sm:text-lg text-gray-600">
 					基礎から実践まで、段階的に学べるカリキュラム
 				</p>
 			</div>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
 				{#each contentCategories as category}
-					<div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all hover:border-blue-300">
+					<div class="bg-white p-5 sm:p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all hover:border-blue-300">
 						<div class="flex items-center justify-between mb-3">
-							<h4 class="text-lg font-bold text-gray-900">{category.name}</h4>
-							<span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
+							<h4 class="text-base sm:text-lg font-bold text-gray-900">{category.name}</h4>
+							<span class="px-2.5 sm:px-3 py-1 bg-blue-100 text-blue-700 text-xs sm:text-sm font-semibold rounded-full whitespace-nowrap">
 								{category.count}
 							</span>
 						</div>
-						<div class="flex items-center text-gray-600 text-sm">
-							<div class="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center text-white mr-2">
+						<div class="flex items-center text-gray-600 text-xs sm:text-sm">
+							<div class="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center text-white mr-2 flex-shrink-0">
 								<div class="w-3 h-3">
 									{@html getIconSVG('book')}
 								</div>
@@ -190,47 +190,47 @@
 	</section>
 
 	<!-- 学習の流れセクション -->
-	<section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+	<section class="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
 		<div class="max-w-7xl mx-auto">
-			<div class="text-center mb-16">
-				<h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+			<div class="text-center mb-10 sm:mb-12 md:mb-16">
+				<h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
 					学習の流れ
 				</h3>
-				<p class="text-lg text-gray-600">
+				<p class="text-base sm:text-lg text-gray-600">
 					3つのステップで効率的に学習
 				</p>
 			</div>
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
 				<div class="text-center">
-					<div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-						<div class="w-8 h-8">
+					<div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+						<div class="w-7 h-7 sm:w-8 sm:h-8">
 							{@html getIconSVG('login')}
 						</div>
 					</div>
-					<h4 class="text-xl font-bold text-gray-900 mb-3">ログイン</h4>
-					<p class="text-gray-600">
+					<h4 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">ログイン</h4>
+					<p class="text-sm sm:text-base text-gray-600">
 						企業IDでログインして<br />学習を開始
 					</p>
 				</div>
 				<div class="text-center">
-					<div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-						<div class="w-8 h-8">
+					<div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+						<div class="w-7 h-7 sm:w-8 sm:h-8">
 							{@html getIconSVG('select')}
 						</div>
 					</div>
-					<h4 class="text-xl font-bold text-gray-900 mb-3">コンテンツ選択</h4>
-					<p class="text-gray-600">
+					<h4 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">コンテンツ選択</h4>
+					<p class="text-sm sm:text-base text-gray-600">
 						目的に合わせた<br />コンテンツを選択
 					</p>
 				</div>
 				<div class="text-center">
-					<div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-						<div class="w-8 h-8">
+					<div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-pink-500 to-pink-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+						<div class="w-7 h-7 sm:w-8 sm:h-8">
 							{@html getIconSVG('learn')}
 						</div>
 					</div>
-					<h4 class="text-xl font-bold text-gray-900 mb-3">学習</h4>
-					<p class="text-gray-600">
+					<h4 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">学習</h4>
+					<p class="text-sm sm:text-base text-gray-600">
 						動画・PDFで<br />いつでも学習
 					</p>
 				</div>
@@ -239,20 +239,20 @@
 	</section>
 
 	<!-- CTAセクション -->
-	<section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+	<section class="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
 		<div class="max-w-4xl mx-auto text-center">
-			<h3 class="text-3xl md:text-4xl font-bold text-white mb-6">
+			<h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
 				今すぐ学習を始めませんか？
 			</h3>
-			<p class="text-xl text-blue-100 mb-2">
+			<p class="text-base sm:text-lg md:text-xl text-blue-100 mb-2">
 				THQサービスをご利用の企業様は追加料金なしでご利用いただけます
 			</p>
-			<p class="text-sm text-blue-200 mb-8">
+			<p class="text-xs sm:text-sm text-blue-200 mb-6 sm:mb-8">
 				株式会社総合心理教育研究所が提供する特別な学習プログラム
 			</p>
 			<button
 				on:click={() => goto('/user/login')}
-				class="px-10 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-xl text-lg"
+				class="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-xl text-base sm:text-lg"
 			>
 				ログインして始める
 			</button>
