@@ -95,12 +95,15 @@
 						THQ受検企業様限定プラットフォーム
 					</span>
 				</div>
-				<h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight px-2">
-					メンタルヘルスを<br />
-					<span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-						動画とPDFで学ぶ
-					</span>
-				</h2>
+				<div class="mb-4 sm:mb-6">
+					<p class="text-sm sm:text-base md:text-lg text-gray-600 mb-2 sm:mb-3">総合心理教育研究所監修</p>
+					<h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3 leading-tight px-2">
+						<span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+							WEBTHQAcademy
+						</span>
+					</h2>
+					<p class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">メンタルヘルスプログラム</p>
+				</div>
 				<p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed px-4">
 					ストレスチェック制度の実施から職場のメンタルヘルス対策まで、<br class="hidden sm:block" />
 					実務に必要な知識を体系的に学習できるオンラインプラットフォーム
