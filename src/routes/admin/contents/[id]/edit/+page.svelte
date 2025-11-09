@@ -242,6 +242,10 @@
 		expandedSections = expandedSections;
 	}
 
+	// セクションデータをJSON文字列に変換（リアクティブ）
+	let sectionsJson: string;
+	$: sectionsJson = JSON.stringify(sections);
+
 	// フォーム送信
 	let formElement: HTMLFormElement;
 
@@ -406,7 +410,7 @@
 			<input type="hidden" name="category" bind:value={category} />
 			<input type="hidden" name="order" bind:value={order} />
 			<!-- セクションデータをJSON形式で送信 -->
-			<input type="hidden" name="sections" value={JSON.stringify(sections)} />
+			<input type="hidden" name="sections" bind:value={sectionsJson} />
 
 			<!-- 2カラムレイアウト: 左側にセクション編集、右側にプレビュー -->
 			<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -623,8 +627,6 @@
 					</div>
 				</div>
 			</div>
-
-			<input type="hidden" name="sections" value={JSON.stringify(sections)} />
 		</form>
 	</div>
 </Layout>
