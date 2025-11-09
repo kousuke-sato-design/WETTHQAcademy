@@ -24,52 +24,52 @@
 <Layout user={data.user} contents={data.contents}>
 	<div class="max-w-7xl mx-auto">
 		<!-- Notion風ヘッダーバナー -->
-		<div class="relative mb-12 overflow-hidden">
+		<div class="relative mb-8 md:mb-12 overflow-hidden rounded-lg md:rounded-xl">
 			<!-- 背景グラデーション -->
 			<div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100"></div>
 			<div class="absolute inset-0 opacity-50" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%239C92AC&quot; fill-opacity=&quot;0.05&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
 
 			<!-- コンテンツ -->
-			<div class="relative px-12 py-16">
-				<div class="flex items-center mb-4">
-					<div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg mr-4">
-						<svg class="w-9 h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<div class="relative px-4 py-8 sm:px-8 sm:py-12 md:px-12 md:py-16">
+				<div class="flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left">
+					<div class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg mb-3 sm:mb-0 sm:mr-4">
+						<svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-9 md:h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
 							<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
 						</svg>
 					</div>
 					<div>
-						<h1 class="text-5xl font-bold text-gray-900 mb-1">
+						<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-1">
 							学習ダッシュボード
 						</h1>
-						<p class="text-lg text-gray-600">ようこそ、{data.user?.name || 'ゲスト'}さん</p>
+						<p class="text-sm sm:text-base md:text-lg text-gray-600">ようこそ、{data.user?.name || 'ゲスト'}さん</p>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<!-- 統計カード（Notion風シンプル） -->
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-			<div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+		<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6 md:mb-10">
+			<div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-500 mb-1">利用可能なコンテンツ</p>
-						<h3 class="text-3xl font-bold text-gray-900">{data.contents.length}</h3>
+						<p class="text-xs sm:text-sm text-gray-500 mb-1">利用可能なコンテンツ</p>
+						<h3 class="text-2xl sm:text-3xl font-bold text-gray-900">{data.contents.length}</h3>
 					</div>
-					<div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-						<div class="w-6 h-6 text-blue-600">{@html getIconSVG('books')}</div>
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+						<div class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600">{@html getIconSVG('books')}</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+			<div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-500 mb-1">学習進捗</p>
-						<h3 class="text-2xl font-bold text-gray-400">準備中</h3>
+						<p class="text-xs sm:text-sm text-gray-500 mb-1">学習進捗</p>
+						<h3 class="text-xl sm:text-2xl font-bold text-gray-400">準備中</h3>
 					</div>
-					<div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
-						<svg class="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+						<svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
 							<polyline points="22 4 12 14.01 9 11.01"/>
 						</svg>
@@ -77,14 +77,14 @@
 				</div>
 			</div>
 
-			<div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+			<div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow sm:col-span-2 md:col-span-1">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-500 mb-1">学習時間</p>
-						<h3 class="text-2xl font-bold text-gray-400">準備中</h3>
+						<p class="text-xs sm:text-sm text-gray-500 mb-1">学習時間</p>
+						<h3 class="text-xl sm:text-2xl font-bold text-gray-400">準備中</h3>
 					</div>
-					<div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
-						<svg class="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+						<svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<circle cx="12" cy="12" r="10"/>
 							<polyline points="12 6 12 12 16 14"/>
 						</svg>
@@ -96,12 +96,12 @@
 		<!-- コンテンツセクション -->
 		{#if data.contents.length > 0}
 			<div class="mb-8">
-				<div class="flex items-center justify-between mb-6">
-					<h2 class="text-2xl font-bold text-gray-900">学習コンテンツ</h2>
-					<span class="text-sm text-gray-500">{data.contents.length}件</span>
+				<div class="flex items-center justify-between mb-4 sm:mb-6">
+					<h2 class="text-xl sm:text-2xl font-bold text-gray-900">学習コンテンツ</h2>
+					<span class="text-xs sm:text-sm text-gray-500">{data.contents.length}件</span>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
 					{#each data.contents as content}
 						<a
 							href="/user/contents/{content.id}"

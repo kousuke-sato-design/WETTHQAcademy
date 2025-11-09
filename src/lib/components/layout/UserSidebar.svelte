@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { createEventDispatcher } from 'svelte';
 	import type { User } from '$lib/auth/auth';
 
 	export let user: User;
 	export let contents: Array<{ id: number; title: string; sidebar_icon: string; sidebar_order: number }> = [];
+
+	const dispatch = createEventDispatcher();
 
 	$: currentPath = $page.url.pathname;
 
@@ -18,13 +21,18 @@
 		};
 		return icons[iconName] || '';
 	}
+
+	function handleLinkClick() {
+		dispatch('linkClick');
+	}
 </script>
 
-<aside class="w-64 bg-white border-r border-gray-200 min-h-screen">
+<aside class="w-64 bg-white border-r border-gray-200 min-h-screen overflow-y-auto">
 	<nav class="p-4 space-y-1">
 		<!-- ダッシュボード -->
 		<a
 			href="/user/dashboard"
+			on:click={handleLinkClick}
 			class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors {currentPath === '/user/dashboard'
 				? 'bg-blue-50 text-blue-700 font-medium'
 				: 'text-gray-700 hover:bg-gray-50'}"
@@ -44,6 +52,7 @@
 				{#each contents as content}
 					<a
 						href="/user/contents/{content.id}"
+						on:click={handleLinkClick}
 						class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors {currentPath === `/user/contents/${content.id}`
 							? 'bg-blue-50 text-blue-700 font-medium'
 							: 'text-gray-700 hover:bg-gray-50'}"
