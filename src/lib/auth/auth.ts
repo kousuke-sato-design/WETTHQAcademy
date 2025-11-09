@@ -115,7 +115,25 @@ export function serializeUser(user: User): string {
 
 export function deserializeUser(data: string): User | null {
 	try {
-		return JSON.parse(data);
+		const parsed = JSON.parse(data);
+
+		// 新しい形式: { userId, role, company_id? }
+		if (parsed.userId && parsed.role) {
+			return {
+				id: parsed.userId,
+				login_id: '', // 簡易形式では不明
+				role: parsed.role,
+				company_id: parsed.company_id || null,
+				name: '' // 簡易形式では不明
+			};
+		}
+
+		// 完全な形式: User オブジェクト
+		if (parsed.id && parsed.role) {
+			return parsed as User;
+		}
+
+		return null;
 	} catch {
 		return null;
 	}

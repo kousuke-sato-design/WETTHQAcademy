@@ -70,13 +70,13 @@
 				</div>
 				<div class="flex items-center gap-3">
 					<button
-						on:click={() => goto('/company')}
+						on:click={() => goto('/company/login')}
 						class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
 					>
 						担当者
 					</button>
 					<button
-						on:click={() => goto('/user')}
+						on:click={() => goto('/user/login')}
 						class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
 					>
 						ログイン
@@ -110,7 +110,7 @@
 				</p>
 				<div class="flex justify-center gap-4">
 					<button
-						on:click={() => goto('/user')}
+						on:click={() => goto('/user/login')}
 						class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
 					>
 						学習を始める →
@@ -251,7 +251,7 @@
 				株式会社総合心理教育研究所が提供する特別な学習プログラム
 			</p>
 			<button
-				on:click={() => goto('/login/company')}
+				on:click={() => goto('/user/login')}
 				class="px-10 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-xl text-lg"
 			>
 				ログインして始める
@@ -281,7 +281,7 @@
 			</p>
 			<div class="mt-6">
 				<a
-					href="/admin"
+					href="/admin/login"
 					class="text-xs text-gray-700 hover:text-gray-500 transition-colors"
 				>
 					管理者

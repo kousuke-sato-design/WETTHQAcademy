@@ -31,17 +31,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// 自社の生徒 + 統一IDユーザーを表示
 	const usersResult = await turso.execute({
 		sql: `
-			SELECT id, name, login_id, created_at, use_unified_id
+			SELECT id, name, login_id, created_at, use_unified_id, company_id
 			FROM students
-			WHERE company_id = ? OR use_unified_id = 1
+			WHERE (company_id = ? AND use_unified_id = 0) OR use_unified_id = 1
 			ORDER BY use_unified_id DESC, created_at DESC
 		`,
 		args: [companyId]
 	});
-
-	console.log('Company ID:', companyId);
-	console.log('Query result rows:', usersResult.rows.length);
-	console.log('All students:', usersResult.rows);
 
 	const users = usersResult.rows.map((row) => ({
 		id: row.id as number,
@@ -50,8 +46,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		created_at: row.created_at as string,
 		use_unified_id: row.use_unified_id as number
 	}));
-
-	console.log('Mapped users:', users);
 
 	return {
 		user: locals.user,

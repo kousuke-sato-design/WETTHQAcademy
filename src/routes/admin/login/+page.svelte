@@ -44,7 +44,7 @@
 					<p class="text-gray-600 text-sm">システム管理者専用</p>
 				</div>
 
-				<form method="POST" action="/admin?/login" use:enhance class="space-y-5">
+				<form method="POST" action="?/login" use:enhance class="space-y-5">
 					{#if error}
 						<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
 							{error}

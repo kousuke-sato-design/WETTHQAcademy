@@ -201,6 +201,29 @@
 		return colors[sectionType];
 	}
 
+	// 動画URLを埋め込み形式に変換
+	function convertToEmbedUrl(url: string): string {
+		if (!url) return '';
+
+		// YouTube URL変換
+		// https://www.youtube.com/watch?v=VIDEO_ID → https://www.youtube.com/embed/VIDEO_ID
+		// https://youtu.be/VIDEO_ID → https://www.youtube.com/embed/VIDEO_ID
+		const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+		if (youtubeMatch) {
+			return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+		}
+
+		// Vimeo URL変換
+		// https://vimeo.com/VIDEO_ID → https://player.vimeo.com/video/VIDEO_ID
+		const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+		if (vimeoMatch) {
+			return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+		}
+
+		// すでに埋め込み形式の場合、またはその他のURLはそのまま返す
+		return url;
+	}
+
 	// トグル状態の管理
 	let expandedSections: Set<string> = new Set();
 
@@ -278,7 +301,7 @@
 	<title>新規コンテンツ作成 - WEBTHQAcademy</title>
 </svelte:head>
 
-<Layout user={data.user}>
+<Layout user={data.user} contents={data.contents}>
 	<div class="max-w-full px-6">
 		<!-- ヘッダー -->
 		<div class="mb-6">
@@ -578,9 +601,10 @@
 																	<input
 																		type="url"
 																		bind:value={item.content}
-																		placeholder="動画URL（または下からファイルをアップロード）"
+																		placeholder="YouTube/Vimeo URL（例: https://www.youtube.com/watch?v=xxx または https://vimeo.com/xxx）"
 																		class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
 																	/>
+																	<p class="text-xs text-gray-500">YouTube、Vimeoの動画URLを入力してください</p>
 																	<div class="flex items-center space-x-2">
 																		<label class="flex-1 cursor-pointer">
 																			<input
@@ -688,7 +712,7 @@
 													<p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{item.content || 'テキスト'}</p>
 												{:else if item.type === 'video' && item.content}
 													<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-														<iframe src={item.content} class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+														<iframe src={convertToEmbedUrl(item.content)} class="w-full h-full" frameborder="0" allowfullscreen></iframe>
 													</div>
 												{:else if item.type === 'image' && item.content}
 													<img src={item.content} alt="" class="w-full rounded-lg shadow-sm" />

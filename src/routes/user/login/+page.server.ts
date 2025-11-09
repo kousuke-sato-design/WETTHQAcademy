@@ -33,6 +33,60 @@ export const actions = {
 		}
 
 		try {
+			// 統一IDユーザーの場合（login_id = "user"）
+			if (login_id === 'user') {
+				// 統一IDユーザーを検索
+				const result = await turso.execute({
+					sql: `
+						SELECT id, login_id, password_hash, company_id, name, use_unified_id
+						FROM students
+						WHERE login_id = ? AND use_unified_id = 1
+					`,
+					args: [login_id]
+				});
+
+				if (result.rows.length === 0) {
+					return fail(400, { error: 'ユーザーIDまたはパスワードが正しくありません' });
+				}
+
+				const user = result.rows[0];
+				const passwordHash = user.password_hash as string;
+
+				// パスワードを検証
+				const validPassword = await bcrypt.compare(password, passwordHash);
+
+				if (!validPassword) {
+					return fail(400, { error: 'ユーザーIDまたはパスワードが正しくありません' });
+				}
+
+				// 企業コードから企業IDを取得（統一IDユーザーの場合、ログイン時に企業を指定）
+				const companyResult = await turso.execute({
+					sql: 'SELECT id FROM companies WHERE company_code = ?',
+					args: [company_code]
+				});
+
+				if (companyResult.rows.length === 0) {
+					return fail(400, { error: '企業IDが正しくありません' });
+				}
+
+				const company_id = companyResult.rows[0].id as number;
+
+				// セッションにログイン（企業IDを保存）
+				cookies.set('session', JSON.stringify({
+					userId: user.id,
+					role: 'user',
+					company_id: company_id
+				}), {
+					path: '/',
+					httpOnly: true,
+					sameSite: 'strict',
+					maxAge: 60 * 60 * 24 * 7 // 1週間
+				});
+
+				throw redirect(303, '/user/dashboard');
+			}
+
+			// 個別IDユーザーの場合
 			// 企業コードから企業IDを取得
 			const companyResult = await turso.execute({
 				sql: 'SELECT id FROM companies WHERE company_code = ?',
@@ -45,12 +99,12 @@ export const actions = {
 
 			const company_id = companyResult.rows[0].id as number;
 
-			// ユーザーを検索（企業ID、ログインID、ロールで検索）
+			// ユーザーを検索（企業ID、ログインIDで検索）
 			const result = await turso.execute({
 				sql: `
-					SELECT id, login_id, password_hash, role, company_id, name
-					FROM users
-					WHERE company_id = ? AND login_id = ? AND role = 'user'
+					SELECT id, login_id, password_hash, company_id, name, use_unified_id
+					FROM students
+					WHERE company_id = ? AND login_id = ? AND use_unified_id = 0
 				`,
 				args: [company_id, login_id]
 			});
@@ -70,22 +124,15 @@ export const actions = {
 			}
 
 			// セッションを作成
-			const sessionId = crypto.randomUUID();
-			const expiresAt = new Date();
-			expiresAt.setDate(expiresAt.getDate() + 7); // 7日間有効
-
-			await turso.execute({
-				sql: 'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)',
-				args: [sessionId, user.id as number, expiresAt.toISOString()]
-			});
-
-			// クッキーにセッションIDを保存
-			cookies.set('session', sessionId, {
+			cookies.set('session', JSON.stringify({
+				userId: user.id,
+				role: 'user',
+				company_id: user.company_id
+			}), {
 				path: '/',
 				httpOnly: true,
-				sameSite: 'lax',
-				expires: expiresAt,
-				secure: process.env.NODE_ENV === 'production'
+				sameSite: 'strict',
+				maxAge: 60 * 60 * 24 * 7 // 1週間
 			});
 
 			// ダッシュボードへリダイレクト

@@ -20,7 +20,7 @@ export const actions = {
 		}
 
 		// セッションを設定
-		cookies.set('session', JSON.stringify({ userId: user.id, role: user.role }), {
+		cookies.set('session', JSON.stringify({ userId: user.id, role: user.role, company_id: user.company_id }), {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'strict',

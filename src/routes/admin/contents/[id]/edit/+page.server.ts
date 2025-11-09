@@ -33,8 +33,26 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		created_at: row.created_at as string
 	}));
 
+	// サイドバー用のコンテンツ一覧を取得
+	const contentsResult = await turso.execute({
+		sql: `
+			SELECT id, title, sidebar_icon, sidebar_order
+			FROM contents
+			WHERE show_in_sidebar = 1
+			ORDER BY sidebar_order ASC, created_at ASC
+		`
+	});
+
+	const contents = contentsResult.rows.map((row) => ({
+		id: row.id as number,
+		title: row.title as string,
+		sidebar_icon: row.sidebar_icon as string,
+		sidebar_order: row.sidebar_order as number
+	}));
+
 	return {
 		user: locals.user,
+		contents,
 		content: {
 			id: content.id as number,
 			title: content.title as string,

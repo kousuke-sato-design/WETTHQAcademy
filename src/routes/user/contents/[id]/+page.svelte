@@ -14,6 +14,29 @@
 		};
 		return colors[sectionType] || 'border-gray-500';
 	}
+
+	// 動画URLを埋め込み形式に変換
+	function convertToEmbedUrl(url: string): string {
+		if (!url) return '';
+
+		// YouTube URL変換
+		// https://www.youtube.com/watch?v=VIDEO_ID → https://www.youtube.com/embed/VIDEO_ID
+		// https://youtu.be/VIDEO_ID → https://www.youtube.com/embed/VIDEO_ID
+		const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+		if (youtubeMatch) {
+			return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+		}
+
+		// Vimeo URL変換
+		// https://vimeo.com/VIDEO_ID → https://player.vimeo.com/video/VIDEO_ID
+		const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+		if (vimeoMatch) {
+			return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+		}
+
+		// すでに埋め込み形式の場合、またはその他のURLはそのまま返す
+		return url;
+	}
 </script>
 
 <svelte:head>
@@ -45,24 +68,25 @@
 				<p class="text-yellow-800">このコンテンツにはまだセクションが追加されていません。</p>
 			</div>
 		{:else}
-			<div class="space-y-8">
-				{#each data.sections as section}
-					<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-						<div class="border-l-4 {getSectionTypeColor(section.sectionType)} pl-6 pr-6 py-6">
+			<!-- 1つの大きなボックスにすべてのセクションをまとめる -->
+			<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+				<div class="space-y-12">
+					{#each data.sections as section}
+						<div class="space-y-6">
 							{#if section.title}
-								<h2 class="text-2xl font-bold text-gray-900 mb-6">{section.title}</h2>
+								<h2 class="text-2xl font-bold text-gray-900 pb-3 border-b border-gray-200">{section.title}</h2>
 							{/if}
 
 							<div class="space-y-6">
 								{#each section.items as item}
 									{#if item.type === 'heading'}
-										<h3 class="text-xl font-semibold text-gray-800">{item.content}</h3>
+										<h3 class="text-xl font-semibold text-gray-800 mt-6">{item.content}</h3>
 									{:else if item.type === 'text'}
 										<p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{item.content}</p>
 									{:else if item.type === 'video' && item.content}
 										<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-md">
 											<iframe
-												src={item.content}
+												src={convertToEmbedUrl(item.content)}
 												class="w-full h-full"
 												frameborder="0"
 												allowfullscreen
@@ -79,8 +103,8 @@
 								{/each}
 							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+				</div>
 			</div>
 		{/if}
 	</div>
