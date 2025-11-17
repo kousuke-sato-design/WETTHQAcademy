@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Layout from '$lib/components/layout/Layout.svelte';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 
 	export let data: PageData;
@@ -45,6 +46,37 @@
 				order: index
 			};
 		});
+	}
+
+	// データが更新されたら状態を更新
+	$: {
+		title = data.content.title;
+		description = data.content.description || '';
+		category = data.content.category || '';
+		order = data.content.order.toString();
+
+		if (data.sections && data.sections.length > 0) {
+			sections = data.sections.map((s: any, index: number) => {
+				let content = '';
+				if (Array.isArray(s.items) && s.items.length > 0) {
+					if (s.items[0].type === 'video') {
+						content = s.items[0].content || '';
+					} else if (s.items[0].type === 'text') {
+						content = s.items.map((item: any) => item.content).join('\n\n');
+					} else {
+						content = s.items[0].content || '';
+					}
+				}
+
+				return {
+					type: (s.section_type === 'video' ? 'video' : s.section_type === 'attachment' ? 'attachment' : 'text') as SectionType,
+					title: s.title || '',
+					content: content,
+					order: index
+				};
+			});
+			sectionToggles = sections.map(() => true);
+		}
 	}
 
 	// セクションを追加
@@ -157,6 +189,16 @@
 		removeSection(index);
 		sectionToggles = sectionToggles.filter((_, i) => i !== index);
 	}
+
+	// フォーム送信後にデータを再読み込み
+	async function handleSubmit() {
+		return async ({ result }: { result: any }) => {
+			if (result.type === 'success') {
+				// データを再読み込み
+				await invalidateAll();
+			}
+		};
+	}
 </script>
 
 <svelte:head>
@@ -194,7 +236,7 @@
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 			<!-- 左側: 編集フォーム -->
 			<div class="space-y-6">
-				<form method="POST" use:enhance class="space-y-6">
+				<form method="POST" use:enhance={handleSubmit} class="space-y-6">
 					<!-- 基本情報 (折りたたみ可能) -->
 					<div class="bg-white rounded-lg shadow-sm border border-gray-200">
 						<button
