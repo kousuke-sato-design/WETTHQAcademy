@@ -46,7 +46,8 @@
       "Bash(powershell -Command:*)",
       "Bash(git checkout:*)",
       "Bash(del \"C:\\Users\\lipto\\Desktop\\WEBTHQAcademy\\src\\routes\\admin\\contents\\new\\+page.ts\" \"C:\\Users\\lipto\\Desktop\\WEBTHQAcademy\\src\\routes\\admin\\contents\\[id]\\edit\\+page.ts\")",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(npm run dev:sveltekit:*)"
     ],
     "deny": [],
     "ask": []
