@@ -27,7 +27,10 @@
 	let sections: Section[] = [];
 	if (data.sections && data.sections.length > 0) {
 		sections = data.sections.map((s: any, index: number) => {
-			// section_typeとitemsから適切な形式に変換
+			// sectionType, section_type, または type から取得（後方互換性のため）
+			const sectionType = s.sectionType || s.section_type || s.type || 'text';
+
+			// itemsから適切な形式に変換
 			let content = '';
 			if (Array.isArray(s.items) && s.items.length > 0) {
 				if (s.items[0].type === 'video') {
@@ -40,7 +43,7 @@
 			}
 
 			return {
-				type: (s.section_type === 'video' ? 'video' : s.section_type === 'attachment' ? 'attachment' : 'text') as SectionType,
+				type: (sectionType === 'video' ? 'video' : sectionType === 'attachment' ? 'attachment' : 'text') as SectionType,
 				title: s.title || '',
 				content: content,
 				order: index
