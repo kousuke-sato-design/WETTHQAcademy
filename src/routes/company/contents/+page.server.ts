@@ -15,11 +15,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 		};
 	}
 
-	// コンテンツ一覧を取得（生徒と同じ）
+	// この企業が閲覧許可を持っているコンテンツのみを取得
 	let contentsResult;
 	try {
 		contentsResult = await db.execute({
-			sql: 'SELECT id, title, description, category, created_at, content_type FROM contents'
+			sql: `
+				SELECT c.id, c.title, c.description, c.category, c.created_at, c.content_type
+				FROM contents c
+				INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
+				WHERE ccp.company_id = ?
+				ORDER BY c.created_at DESC
+			`,
+			args: [user.company_id]
 		});
 	} catch (error) {
 		console.error('Error fetching contents:', error);
