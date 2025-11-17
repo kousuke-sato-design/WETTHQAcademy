@@ -68,14 +68,18 @@
 	function moveSectionUp(index: number) {
 		if (index === 0) return;
 		[sections[index - 1], sections[index]] = [sections[index], sections[index - 1]];
+		[sectionToggles[index - 1], sectionToggles[index]] = [sectionToggles[index], sectionToggles[index - 1]];
 		sections = sections.map((s, i) => ({ ...s, order: i }));
+		sectionToggles = [...sectionToggles];
 	}
 
 	// セクションを下に移動
 	function moveSectionDown(index: number) {
 		if (index === sections.length - 1) return;
 		[sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
+		[sectionToggles[index], sectionToggles[index + 1]] = [sectionToggles[index + 1], sectionToggles[index]];
 		sections = sections.map((s, i) => ({ ...s, order: i }));
+		sectionToggles = [...sectionToggles];
 	}
 
 	// セクションタイプの日本語表示
@@ -139,8 +143,20 @@
 	}
 
 	// トグル状態
-	let sectionListOpen = true;
-	let basicInfoOpen = false;
+	let basicInfoOpen = true;
+	let sectionToggles: boolean[] = sections.map(() => true); // 各セクションの開閉状態
+
+	// セクション追加時にトグル状態も追加
+	function addSectionWithToggle(type: SectionType) {
+		addSection(type);
+		sectionToggles = [...sectionToggles, true];
+	}
+
+	// セクション削除時にトグル状態も削除
+	function removeSectionWithToggle(index: number) {
+		removeSection(index);
+		sectionToggles = sectionToggles.filter((_, i) => i !== index);
+	}
 </script>
 
 <svelte:head>
@@ -179,113 +195,6 @@
 			<!-- 左側: 編集フォーム -->
 			<div class="space-y-6">
 				<form method="POST" use:enhance class="space-y-6">
-					<!-- セクション一覧 (最上部・折りたたみ可能) -->
-					{#if sections.length > 0}
-						<div class="bg-white rounded-lg shadow-sm border border-gray-200">
-							<button
-								type="button"
-								on:click={() => sectionListOpen = !sectionListOpen}
-								class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-							>
-								<h2 class="text-lg font-semibold text-gray-900">セクション一覧</h2>
-								<svg
-									class="w-5 h-5 text-gray-600 transition-transform {sectionListOpen ? 'rotate-180' : ''}"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-								</svg>
-							</button>
-
-							{#if sectionListOpen}
-								<div class="px-6 pb-6 border-t border-gray-200">
-									<div class="space-y-4 mt-4">
-										{#each sections as section, index}
-											<div class="border-2 {getSectionTypeColor(section.type)} rounded-lg p-4">
-												<!-- セクションヘッダー -->
-												<div class="flex items-center justify-between mb-3">
-													<span class="px-3 py-1 {getSectionTypeColor(section.type)} text-sm font-semibold rounded-full">
-														{getSectionTypeLabel(section.type)}
-													</span>
-													<div class="flex items-center space-x-2">
-														<button
-															type="button"
-															on:click={() => moveSectionUp(index)}
-															disabled={index === 0}
-															class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
-															title="上に移動"
-														>
-															↑
-														</button>
-														<button
-															type="button"
-															on:click={() => moveSectionDown(index)}
-															disabled={index === sections.length - 1}
-															class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
-															title="下に移動"
-														>
-															↓
-														</button>
-														<button
-															type="button"
-															on:click={() => removeSection(index)}
-															class="px-2 py-1 text-red-600 hover:text-red-800 font-bold"
-															title="削除"
-														>
-															✕
-														</button>
-													</div>
-												</div>
-
-												<!-- タイトル -->
-												<div class="mb-3">
-													<label class="block text-sm font-medium text-gray-700 mb-1">
-														セクションタイトル
-													</label>
-													<input
-														type="text"
-														bind:value={section.title}
-														placeholder="セクションのタイトル（任意）"
-														class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-													/>
-												</div>
-
-												<!-- コンテンツ -->
-												<div>
-													<label class="block text-sm font-medium text-gray-700 mb-1">
-														{#if section.type === 'text'}
-															HTMLテキスト
-														{:else if section.type === 'attachment'}
-															Google DriveのURL
-														{:else}
-															動画URL (YouTube/Vimeo)
-														{/if}
-													</label>
-													{#if section.type === 'text'}
-														<textarea
-															bind:value={section.content}
-															rows="6"
-															placeholder="HTMLやテキストを入力してください"
-															class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white"
-														></textarea>
-													{:else}
-														<input
-															type="text"
-															bind:value={section.content}
-															placeholder={section.type === 'attachment' ? 'https://drive.google.com/file/d/...' : 'https://www.youtube.com/watch?v=...'}
-															class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-														/>
-													{/if}
-												</div>
-											</div>
-										{/each}
-									</div>
-								</div>
-							{/if}
-						</div>
-					{/if}
-
 					<!-- 基本情報 (折りたたみ可能) -->
 					<div class="bg-white rounded-lg shadow-sm border border-gray-200">
 						<button
@@ -373,6 +282,114 @@
 						{/if}
 					</div>
 
+					<!-- セクション一覧 -->
+					{#if sections.length > 0}
+						<div class="space-y-4">
+							<h2 class="text-lg font-semibold text-gray-900">セクション一覧</h2>
+							{#each sections as section, index}
+								<div class="bg-white rounded-lg shadow-sm border-2 {getSectionTypeColor(section.type)}">
+									<!-- セクションヘッダー -->
+									<div class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-t-lg">
+										<button
+											type="button"
+											on:click={() => sectionToggles[index] = !sectionToggles[index]}
+											class="flex items-center space-x-3 flex-1 text-left"
+										>
+											<span class="px-3 py-1 {getSectionTypeColor(section.type)} text-sm font-semibold rounded-full">
+												{getSectionTypeLabel(section.type)}
+											</span>
+											<span class="text-gray-700 font-medium">
+												{section.title || '（タイトル未設定）'}
+											</span>
+											<svg
+												class="w-5 h-5 text-gray-600 transition-transform {sectionToggles[index] ? 'rotate-180' : ''}"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+											</svg>
+										</button>
+										<div class="flex items-center space-x-2">
+											<button
+												type="button"
+												on:click={() => moveSectionUp(index)}
+												disabled={index === 0}
+												class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
+												title="上に移動"
+											>
+												↑
+											</button>
+											<button
+												type="button"
+												on:click={() => moveSectionDown(index)}
+												disabled={index === sections.length - 1}
+												class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
+												title="下に移動"
+											>
+												↓
+											</button>
+											<button
+												type="button"
+												on:click={() => removeSectionWithToggle(index)}
+												class="px-2 py-1 text-red-600 hover:text-red-800 font-bold"
+												title="削除"
+											>
+												✕
+											</button>
+										</div>
+									</div>
+
+									<!-- セクションコンテンツ（折りたたみ可能） -->
+									{#if sectionToggles[index]}
+										<div class="px-4 pb-4 border-t border-gray-200">
+											<!-- タイトル -->
+											<div class="mb-3 mt-4">
+												<label class="block text-sm font-medium text-gray-700 mb-1">
+													セクションタイトル
+												</label>
+												<input
+													type="text"
+													bind:value={section.title}
+													placeholder="セクションのタイトル（任意）"
+													class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+												/>
+											</div>
+
+											<!-- コンテンツ -->
+											<div>
+												<label class="block text-sm font-medium text-gray-700 mb-1">
+													{#if section.type === 'text'}
+														HTMLテキスト
+													{:else if section.type === 'attachment'}
+														Google DriveのURL
+													{:else}
+														動画URL (YouTube/Vimeo)
+													{/if}
+												</label>
+												{#if section.type === 'text'}
+													<textarea
+														bind:value={section.content}
+														rows="6"
+														placeholder="HTMLやテキストを入力してください"
+														class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white"
+													></textarea>
+												{:else}
+													<input
+														type="text"
+														bind:value={section.content}
+														placeholder={section.type === 'attachment' ? 'https://drive.google.com/file/d/...' : 'https://www.youtube.com/watch?v=...'}
+														class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+													/>
+												{/if}
+											</div>
+										</div>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
+
 					<!-- セクション追加ボタン -->
 					<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 						<h2 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">セクション追加</h2>
@@ -380,21 +397,21 @@
 						<div class="grid grid-cols-3 gap-3">
 							<button
 								type="button"
-								on:click={() => addSection('text')}
+								on:click={() => addSectionWithToggle('text')}
 								class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
 							>
 								HTMLテキスト
 							</button>
 							<button
 								type="button"
-								on:click={() => addSection('attachment')}
+								on:click={() => addSectionWithToggle('attachment')}
 								class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
 							>
 								Google Drive添付
 							</button>
 							<button
 								type="button"
-								on:click={() => addSection('video')}
+								on:click={() => addSectionWithToggle('video')}
 								class="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
 							>
 								動画URL
