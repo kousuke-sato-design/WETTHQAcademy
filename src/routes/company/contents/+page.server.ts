@@ -11,34 +11,27 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!user || !user.company_id) {
 		return {
 			user: locals.user,
-			totalContents: 0,
-			permittedContents: 0
+			contents: []
 		};
 	}
 
-	// 全コンテンツ数を取得
+	// コンテンツ一覧を取得（生徒と同じ）
 	const contentsResult = await db.execute({
-		sql: 'SELECT COUNT(*) as count FROM contents',
-		args: []
+		sql: 'SELECT * FROM contents ORDER BY "order" ASC'
 	});
-	const totalContents = contentsResult.rows[0].count as number;
 
-	// この企業が閲覧許可を持っているコンテンツ数を取得（テーブルが存在しない場合は0）
-	let permittedContents = 0;
-	try {
-		const permittedResult = await db.execute({
-			sql: 'SELECT COUNT(*) as count FROM company_content_permissions WHERE company_id = ?',
-			args: [user.company_id]
-		});
-		permittedContents = permittedResult.rows[0].count as number;
-	} catch (err) {
-		console.error('company_content_permissions table not found:', err);
-		permittedContents = 0;
-	}
+	const contents = contentsResult.rows.map((row) => ({
+		id: row.id as number,
+		title: row.title as string,
+		description: (row.description as string) || '',
+		category: (row.category as string) || '',
+		created_at: row.created_at as string,
+		content_type: row.content_type as string,
+		viewCount: 0 // TODO: 後で閲覧履歴テーブルを作成して実装
+	}));
 
 	return {
 		user: locals.user,
-		totalContents,
-		permittedContents
+		contents
 	};
 };
