@@ -96,8 +96,11 @@ export const actions = {
 			console.log('Title:', title);
 			console.log('Sections JSON:', sectionsJson);
 
+			// バッチ処理用の配列
+			const statements = [];
+
 			// コンテンツを更新
-			const updateResult = await db.execute({
+			statements.push({
 				sql: 'UPDATE contents SET title = ?, description = ?, category = ?, "order" = ? WHERE id = ?',
 				args: [
 					title,
@@ -107,14 +110,12 @@ export const actions = {
 					contentId
 				]
 			});
-			console.log('Update result:', JSON.stringify(updateResult));
 
 			// 既存のセクションを削除
-			const deleteResult = await db.execute({
+			statements.push({
 				sql: 'DELETE FROM content_sections WHERE content_id = ?',
 				args: [contentId]
 			});
-			console.log('Delete result:', JSON.stringify(deleteResult));
 
 			// 新しいセクションを保存
 			if (sectionsJson) {
@@ -124,35 +125,32 @@ export const actions = {
 
 				for (let i = 0; i < sections.length; i++) {
 					const section = sections[i];
-					console.log(`\n--- Saving section ${i + 1}/${sections.length} ---`);
-					console.log('Section data:', JSON.stringify({
+					console.log(`Adding section ${i + 1} to batch:`, {
 						contentId,
 						sectionType: section.sectionType,
 						title: section.title,
-						items: section.items,
 						order: section.order
-					}));
+					});
 
-					try {
-						const insertResult = await db.execute({
-							sql: 'INSERT INTO content_sections (content_id, section_type, title, items, "order") VALUES (?, ?, ?, ?, ?)',
-							args: [
-								contentId,
-								section.sectionType,
-								section.title || null,
-								JSON.stringify(section.items || []),
-								section.order
-							]
-						});
-						console.log(`Section ${i + 1} insert result:`, JSON.stringify(insertResult));
-					} catch (insertError: any) {
-						console.error(`Failed to insert section ${i + 1}:`, insertError);
-						throw insertError;
-					}
+					statements.push({
+						sql: 'INSERT INTO content_sections (content_id, section_type, title, items, "order") VALUES (?, ?, ?, ?, ?)',
+						args: [
+							contentId,
+							section.sectionType,
+							section.title || null,
+							JSON.stringify(section.items || []),
+							section.order
+						]
+					});
 				}
 			} else {
 				console.log('No sections JSON provided');
 			}
+
+			// バッチ実行
+			console.log('Executing batch with', statements.length, 'statements');
+			const batchResults = await db.batch(statements);
+			console.log('Batch results:', JSON.stringify(batchResults.map(r => ({ success: r.success, changes: r.meta?.changes }))));
 
 			// 保存後の確認
 			const verifyResult = await db.execute({
