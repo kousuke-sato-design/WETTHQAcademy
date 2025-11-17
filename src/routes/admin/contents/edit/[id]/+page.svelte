@@ -193,10 +193,13 @@
 	// フォーム送信後にデータを再読み込み
 	function handleSubmit() {
 		return async ({ result, update }: any) => {
+			console.log('Form result:', result);
+
 			// デフォルトの動作（formの更新）を実行
 			await update();
 
-			if (result.type === 'success' && result.data?.success) {
+			if (result.type === 'success') {
+				console.log('Save successful, reloading data...');
 				// データを再読み込み
 				await invalidateAll();
 			}
