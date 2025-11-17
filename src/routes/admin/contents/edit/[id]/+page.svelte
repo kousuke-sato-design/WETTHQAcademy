@@ -48,37 +48,12 @@
 		});
 	}
 
-	// データが更新されたら状態を更新
+	// 基本情報のみリアクティブに更新（セクションは保持）
 	$: {
-		console.log('Reactive update triggered. data.sections:', data.sections);
 		title = data.content.title;
 		description = data.content.description || '';
 		category = data.content.category || '';
 		order = data.content.order.toString();
-
-		if (data.sections && data.sections.length > 0) {
-			console.log('Updating sections from data. Count:', data.sections.length);
-			sections = data.sections.map((s: any, index: number) => {
-				let content = '';
-				if (Array.isArray(s.items) && s.items.length > 0) {
-					if (s.items[0].type === 'video') {
-						content = s.items[0].content || '';
-					} else if (s.items[0].type === 'text') {
-						content = s.items.map((item: any) => item.content).join('\n\n');
-					} else {
-						content = s.items[0].content || '';
-					}
-				}
-
-				return {
-					type: (s.section_type === 'video' ? 'video' : s.section_type === 'attachment' ? 'attachment' : 'text') as SectionType,
-					title: s.title || '',
-					content: content,
-					order: index
-				};
-			});
-			sectionToggles = sections.map(() => true);
-		}
 	}
 
 	// セクションを追加
@@ -89,6 +64,9 @@
 			content: '',
 			order: sections.length
 		}];
+		console.log('=== SECTION ADDED ===');
+		console.log('Sections count:', sections.length);
+		console.log('Sections:', sections);
 	}
 
 	// セクションを削除
@@ -192,23 +170,33 @@
 		sectionToggles = sectionToggles.filter((_, i) => i !== index);
 	}
 
-	// フォーム送信後にデータを再読み込み
-	function handleSubmit() {
-		return async ({ result, update }: any) => {
-			console.log('=== FORM SUBMISSION ===');
-			console.log('Sections being saved:', prepareSectionsForSave());
-			console.log('Form result:', JSON.stringify(result, null, 2));
+	// セクションデータをリアクティブに JSON 文字列化
+	let sectionsJsonValue = '';
+	$: {
+		const prepared = prepareSectionsForSave();
+		sectionsJsonValue = JSON.stringify(prepared);
+		console.log('=== REACTIVE UPDATE ===');
+		console.log('Sections count:', sections.length);
+		console.log('Prepared sections:', prepared);
+		console.log('JSON value:', sectionsJsonValue);
+	}
 
-			// デフォルトの動作（formの更新）を実行
-			await update();
+	// フォーム送信処理
+	function handleSubmit() {
+		return async ({ result }: any) => {
+			console.log('=== FORM SUBMISSION ===');
+			console.log('Sections JSON being submitted:', sectionsJsonValue);
+
+			// update()を呼ばない - セクションデータを保持する
+
+			console.log('=== FORM RESULT ===');
+			console.log('Result type:', result.type);
+			console.log('Result data:', result.data);
 
 			if (result.type === 'success') {
-				console.log('Save successful, reloading data...');
-				console.log('Current sections before invalidate:', sections);
-				// データを再読み込み
-				await invalidateAll();
-				console.log('Data after invalidate:', data);
-				console.log('Sections after invalidate:', sections);
+				alert('保存しました！');
+			} else if (result.type === 'failure') {
+				alert('保存に失敗しました: ' + (result.data?.error || 'エラー'));
 			}
 		};
 	}
@@ -250,6 +238,9 @@
 			<!-- 左側: 編集フォーム -->
 			<div class="space-y-6">
 				<form method="POST" use:enhance={handleSubmit} class="space-y-6">
+					<!-- セクションデータ（リアクティブに更新） -->
+					<input type="hidden" name="sections" bind:value={sectionsJsonValue} />
+
 					<!-- 基本情報 (折りたたみ可能) -->
 					<div class="bg-white rounded-lg shadow-sm border border-gray-200">
 						<button
@@ -473,9 +464,6 @@
 							</button>
 						</div>
 					</div>
-
-					<!-- セクションデータをJSON形式で送信 -->
-					<input type="hidden" name="sections" value={JSON.stringify(prepareSectionsForSave())} />
 
 					<!-- 保存ボタン -->
 					<div class="flex items-center justify-end space-x-3 pt-6">

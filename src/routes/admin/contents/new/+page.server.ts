@@ -35,9 +35,9 @@ export const actions = {
 		}
 
 		try {
-			// コンテンツを作成
+			// コンテンツを作成（sectionsカラムにJSON保存）
 			const contentResult = await db.execute({
-				sql: 'INSERT INTO contents (title, description, content_type, content_url, category, "order", show_in_sidebar, sidebar_icon, sidebar_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
+				sql: 'INSERT INTO contents (title, description, content_type, content_url, category, "order", show_in_sidebar, sidebar_icon, sidebar_order, sections) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
 				args: [
 					title,
 					description || null,
@@ -47,28 +47,12 @@ export const actions = {
 					order ? parseInt(order) : 0,
 					showInSidebar,
 					sidebarIcon,
-					sidebarOrder ? parseInt(sidebarOrder) : 0
+					sidebarOrder ? parseInt(sidebarOrder) : 0,
+					sectionsJson || null
 				]
 			});
 
 			const contentId = contentResult.rows[0].id as number;
-
-			// セクションを保存
-			if (sectionsJson) {
-				const sections = JSON.parse(sectionsJson);
-				for (const section of sections) {
-					await db.execute({
-						sql: 'INSERT INTO content_sections (content_id, section_type, title, items, "order") VALUES (?, ?, ?, ?, ?)',
-						args: [
-							contentId,
-							section.sectionType,
-							section.title || null,
-							JSON.stringify(section.items || []),
-							section.order
-						]
-					});
-				}
-			}
 
 			return { success: true, message: '保存しました', contentId };
 		} catch (error: any) {

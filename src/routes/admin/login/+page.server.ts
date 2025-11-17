@@ -25,7 +25,7 @@ export const actions = {
 		}
 
 		// セッションを設定
-		cookies.set('session', JSON.stringify({ userId: user.id, role: user.role }), {
+		cookies.set('admin_session', JSON.stringify({ userId: user.id, role: user.role }), {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'strict',

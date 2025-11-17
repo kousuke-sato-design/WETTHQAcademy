@@ -52,15 +52,29 @@
 					{/if}
 
 					<div>
+						<label for="company_code" class="block text-sm font-medium text-gray-700 mb-2">
+							企業コード
+						</label>
+						<input
+							type="text"
+							id="company_code"
+							name="company_code"
+							required
+							placeholder="企業コードを入力"
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+						/>
+					</div>
+
+					<div>
 						<label for="login_id" class="block text-sm font-medium text-gray-700 mb-2">
-							企業ID
+							担当者ID
 						</label>
 						<input
 							type="text"
 							id="login_id"
-							name="login_id"
+			name="login_id"
 							required
-							placeholder="企業IDを入力"
+							placeholder="担当者IDを入力"
 							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
 						/>
 					</div>

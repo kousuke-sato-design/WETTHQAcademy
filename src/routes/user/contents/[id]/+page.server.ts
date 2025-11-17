@@ -44,12 +44,12 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		sidebar_order: typeof row.sidebar_order === 'number' ? row.sidebar_order : 0
 	}));
 
-	// コンテンツ詳細を取得（閲覧許可チェック付き）
+	// コンテンツ詳細を取得（閲覧許可チェック付き、sectionsカラムも含む）
 	let contentResult;
 	if (companyId) {
 		contentResult = await db.execute({
 			sql: `
-				SELECT c.id, c.title, c.description, c.category
+				SELECT c.id, c.title, c.description, c.category, c.sections
 				FROM contents c
 				INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
 				WHERE c.id = ? AND ccp.company_id = ?
@@ -60,7 +60,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		// 統一IDユーザーの場合は全てのコンテンツにアクセス可能
 		contentResult = await db.execute({
 			sql: `
-				SELECT id, title, description, category
+				SELECT id, title, description, category, sections
 				FROM contents
 				WHERE id = ?
 			`,
@@ -79,33 +79,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		category: contentResult.rows[0].category as string | null
 	};
 
-	// セクションを取得
-	const sectionsResult = await db.execute({
-		sql: `
-			SELECT id, section_type, title, items, "order"
-			FROM content_sections
-			WHERE content_id = ?
-			ORDER BY "order" ASC
-		`,
-		args: [parseInt(contentId)]
-	});
-
-	const sections = sectionsResult.rows.map((row) => {
-		let items = [];
-		try {
-			items = row.items && typeof row.items === 'string' ? JSON.parse(row.items) : [];
-		} catch (e) {
-			console.error('Failed to parse section items:', e);
-			items = [];
-		}
-		return {
-			id: row.id as number,
-			sectionType: row.section_type as string,
-			title: row.title as string | null,
-			items,
-			order: row.order as number
-		};
-	});
+	// セクションをJSONから取得
+	let sections = [];
+	try {
+		const sectionsJson = contentResult.rows[0].sections as string | null;
+		sections = sectionsJson ? JSON.parse(sectionsJson) : [];
+	} catch (e) {
+		console.error('Failed to parse sections JSON:', e);
+		sections = [];
+	}
 
 	return {
 		user: locals.user,

@@ -9,7 +9,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.db = getD1Client(event.platform.env.DB);
 	}
 
-	const session = event.cookies.get('session');
+	// URLパスに基づいて適切なセッションクッキーを取得
+	const path = event.url.pathname;
+	let session: string | undefined;
+
+	if (path.startsWith('/admin')) {
+		session = event.cookies.get('admin_session');
+	} else if (path.startsWith('/company')) {
+		session = event.cookies.get('company_session');
+	} else if (path.startsWith('/user')) {
+		session = event.cookies.get('user_session');
+	}
 
 	if (session) {
 		const user = deserializeUser(session);

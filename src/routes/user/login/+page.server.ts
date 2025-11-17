@@ -76,7 +76,7 @@ export const actions = {
 				const company_id = companyResult.rows[0].id as number;
 
 				// セッションにログイン（企業IDを保存）
-				cookies.set('session', JSON.stringify({
+				cookies.set('user_session', JSON.stringify({
 					userId: user.id,
 					role: 'user',
 					company_id: company_id
@@ -128,7 +128,7 @@ export const actions = {
 			}
 
 			// セッションを作成
-			cookies.set('session', JSON.stringify({
+			cookies.set('user_session', JSON.stringify({
 				userId: user.id,
 				role: 'user',
 				company_id: user.company_id
