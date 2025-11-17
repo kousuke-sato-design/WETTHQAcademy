@@ -47,7 +47,10 @@
       "Bash(git checkout:*)",
       "Bash(del \"C:\\Users\\lipto\\Desktop\\WEBTHQAcademy\\src\\routes\\admin\\contents\\new\\+page.ts\" \"C:\\Users\\lipto\\Desktop\\WEBTHQAcademy\\src\\routes\\admin\\contents\\[id]\\edit\\+page.ts\")",
       "Bash(del nul)",
-      "Bash(npm run dev:sveltekit:*)"
+      "Bash(npm run dev:sveltekit:*)",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:docs.google.com)",
+      "Bash(del sample-content.sql)"
     ],
     "deny": [],
     "ask": []

@@ -50,12 +50,14 @@
 
 	// データが更新されたら状態を更新
 	$: {
+		console.log('Reactive update triggered. data.sections:', data.sections);
 		title = data.content.title;
 		description = data.content.description || '';
 		category = data.content.category || '';
 		order = data.content.order.toString();
 
 		if (data.sections && data.sections.length > 0) {
+			console.log('Updating sections from data. Count:', data.sections.length);
 			sections = data.sections.map((s: any, index: number) => {
 				let content = '';
 				if (Array.isArray(s.items) && s.items.length > 0) {
@@ -193,15 +195,20 @@
 	// フォーム送信後にデータを再読み込み
 	function handleSubmit() {
 		return async ({ result, update }: any) => {
-			console.log('Form result:', result);
+			console.log('=== FORM SUBMISSION ===');
+			console.log('Sections being saved:', prepareSectionsForSave());
+			console.log('Form result:', JSON.stringify(result, null, 2));
 
 			// デフォルトの動作（formの更新）を実行
 			await update();
 
 			if (result.type === 'success') {
 				console.log('Save successful, reloading data...');
+				console.log('Current sections before invalidate:', sections);
 				// データを再読み込み
 				await invalidateAll();
+				console.log('Data after invalidate:', data);
+				console.log('Sections after invalidate:', sections);
 			}
 		};
 	}
