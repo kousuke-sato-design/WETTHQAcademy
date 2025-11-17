@@ -74,7 +74,26 @@
 		</div>
 
 		<!-- クイックアクション -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+			<a
+				href="/company/contents"
+				class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group"
+			>
+				<div class="flex items-center mb-4">
+					<div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white mr-4">
+						<div class="w-7 h-7">
+							{@html getIconSVG('books')}
+						</div>
+					</div>
+					<h3 class="text-xl font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+						コンテンツ管理
+					</h3>
+				</div>
+				<p class="text-gray-600">
+					受講可能なコンテンツの一覧を確認できます。
+				</p>
+			</a>
+
 			<a
 				href="/company/users"
 				class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group"

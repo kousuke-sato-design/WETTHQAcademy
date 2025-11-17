@@ -17,6 +17,7 @@
 
 	const companyMenuItems = [
 		{ href: '/company/dashboard', label: 'ダッシュボード', icon: 'home' },
+		{ href: '/company/contents', label: 'コンテンツ管理', icon: 'books' },
 		{ href: '/company/staff', label: '担当者管理', icon: 'users' },
 		{ href: '/company/users', label: '生徒一覧', icon: 'users' }
 	];
