@@ -1,7 +1,11 @@
 import type { PageServerLoad } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const user = locals.user;
 
 	if (!user) {
@@ -9,7 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	// コンテンツ一覧を取得
-	const result = await turso.execute({
+	const result = await db.execute({
 		sql: 'SELECT id, title, description, content_type, category FROM contents ORDER BY "order" ASC LIMIT 6',
 		args: []
 	});

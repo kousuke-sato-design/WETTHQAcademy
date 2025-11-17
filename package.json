@@ -4,31 +4,32 @@
   "description": "ストレスチェック知識補完プラットフォーム",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "wrangler pages dev --compatibility-date=2024-01-01 --d1 DB=webthqacademy-db -- npm run dev:sveltekit",
+    "dev:sveltekit": "vite dev",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "wrangler pages dev .svelte-kit/cloudflare",
+    "deploy": "npm run build && wrangler pages deploy .svelte-kit/cloudflare",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "db:init": "tsx scripts/init-db.ts"
+    "db:migrate": "wrangler d1 execute webthqacademy-db --file=migrations/0001_initial_schema.sql --remote",
+    "db:seed": "wrangler d1 execute webthqacademy-db --file=migrations/0002_seed_data.sql --remote"
   },
   "devDependencies": {
-    "@sveltejs/adapter-vercel": "^6.1.1",
+    "@cloudflare/workers-types": "^4.20251117.0",
+    "@sveltejs/adapter-cloudflare": "^7.2.4",
     "@sveltejs/kit": "^2.48.4",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.10.0",
     "autoprefixer": "^10.4.21",
-    "dotenv": "^17.2.3",
     "postcss": "^8.5.6",
     "svelte": "^5.43.4",
     "tailwindcss": "^4.1.17",
-    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vite": "^7.2.2"
+    "vite": "^7.2.2",
+    "wrangler": "^4.47.0"
   },
   "dependencies": {
-    "@libsql/client": "^0.15.15",
-    "@vercel/blob": "^2.0.0",
     "bcryptjs": "^3.0.3"
   }
 }

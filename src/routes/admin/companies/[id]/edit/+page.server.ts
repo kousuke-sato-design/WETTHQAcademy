@@ -1,12 +1,16 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const companyId = params.id;
 
 	// 企業情報を取得
-	const companyResult = await turso.execute({
+	const companyResult = await db.execute({
 		sql: 'SELECT id, company_name, company_code FROM companies WHERE id = ?',
 		args: [parseInt(companyId)]
 	});
@@ -22,7 +26,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	};
 
 	// 担当者一覧を取得（company_adminsテーブルから）
-	const staffResult = await turso.execute({
+	const staffResult = await db.execute({
 		sql: `
 			SELECT id, name, login_id, created_at
 			FROM company_admins
@@ -40,7 +44,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}));
 
 	// 生徒一覧を取得（studentsテーブルから）
-	const studentsResult = await turso.execute({
+	const studentsResult = await db.execute({
 		sql: `
 			SELECT id, name, login_id, created_at, use_unified_id
 			FROM students
@@ -59,7 +63,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}));
 
 	// 全コンテンツを取得
-	const contentsResult = await turso.execute({
+	const contentsResult = await db.execute({
 		sql: `
 			SELECT id, title, category, created_at
 			FROM contents
@@ -69,7 +73,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	});
 
 	// この企業が閲覧許可を持っているコンテンツIDを取得
-	const permissionsResult = await turso.execute({
+	const permissionsResult = await db.execute({
 		sql: `
 			SELECT content_id
 			FROM company_content_permissions
@@ -98,7 +102,12 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 };
 
 export const actions = {
-	updateCompany: async ({ request, params }) => {
+	updateCompany: async ({ request, params, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const companyId = params.id;
 		const data = await request.formData();
 		const company_name = data.get('company_name')?.toString();
@@ -109,7 +118,7 @@ export const actions = {
 
 		try {
 			// 企業名のみを更新（企業コードは変更不可）
-			await turso.execute({
+			await db.execute({
 				sql: 'UPDATE companies SET company_name = ? WHERE id = ?',
 				args: [company_name, parseInt(companyId)]
 			});
@@ -124,13 +133,18 @@ export const actions = {
 		}
 	},
 
-	updatePermissions: async ({ request, params }) => {
+	updatePermissions: async ({ request, params, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const companyId = params.id;
 		const data = await request.formData();
 
 		try {
 			// 現在の許可を全て削除
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM company_content_permissions WHERE company_id = ?',
 				args: [parseInt(companyId)]
 			});
@@ -138,7 +152,7 @@ export const actions = {
 			// チェックされたコンテンツの許可を追加
 			const contentIds = data.getAll('content_ids[]');
 			for (const contentId of contentIds) {
-				await turso.execute({
+				await db.execute({
 					sql: 'INSERT INTO company_content_permissions (company_id, content_id) VALUES (?, ?)',
 					args: [parseInt(companyId), parseInt(contentId.toString())]
 				});

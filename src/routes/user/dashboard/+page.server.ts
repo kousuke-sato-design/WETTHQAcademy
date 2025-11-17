@@ -1,7 +1,11 @@
 import type { PageServerLoad } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const user = locals.user;
 
 	// 生徒の企業IDを取得
@@ -11,7 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	if (companyId) {
 		// この企業が閲覧許可を持っているコンテンツのみを取得
-		contentsResult = await turso.execute({
+		contentsResult = await db.execute({
 			sql: `
 				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order
 				FROM contents c
@@ -24,7 +28,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		});
 	} else {
 		// 統一IDユーザーの場合は全てのコンテンツを表示
-		contentsResult = await turso.execute({
+		contentsResult = await db.execute({
 			sql: `
 				SELECT id, title, sidebar_icon, sidebar_order
 				FROM contents
@@ -37,8 +41,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const contents = contentsResult.rows.map((row) => ({
 		id: row.id as number,
 		title: row.title as string,
-		sidebar_icon: row.sidebar_icon as string,
-		sidebar_order: row.sidebar_order as number
+		sidebar_icon: (row.sidebar_icon as string) || 'document',
+		sidebar_order: typeof row.sidebar_order === 'number' ? row.sidebar_order : 0
 	}));
 
 	return {

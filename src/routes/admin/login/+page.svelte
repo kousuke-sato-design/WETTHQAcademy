@@ -60,7 +60,7 @@
 							id="login_id"
 							name="login_id"
 							required
-							placeholder="kousuke-sato@sipe-selye.co.jp"
+							placeholder="管理者IDを入力"
 							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
 						/>
 					</div>
@@ -86,20 +86,6 @@
 						ログイン
 					</button>
 				</form>
-
-				<!-- デモ情報 -->
-				<div class="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-					<p class="font-semibold text-gray-700 mb-2 text-sm flex items-center">
-						<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-						</svg>
-						デモ用アカウント
-					</p>
-					<div class="text-sm text-gray-600 space-y-1">
-						<p><span class="font-medium">ID:</span> kousuke-sato@sipe-selye.co.jp</p>
-						<p><span class="font-medium">パスワード:</span> 14541454</p>
-					</div>
-				</div>
 
 				<!-- 戻るリンク -->
 				<div class="mt-8 text-center">

@@ -1,13 +1,17 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const companyId = locals.user?.company_id;
 
 	// 企業一覧を取得（プルダウン用）
-	const companiesResult = await turso.execute(`
+	const companiesResult = await db.execute(`
 		SELECT id, company_name, company_code
 		FROM companies
 		ORDER BY company_name ASC
@@ -29,7 +33,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	// 生徒一覧を取得（studentsテーブルから）
 	// 自社の生徒 + 統一IDユーザーを表示
-	const usersResult = await turso.execute({
+	const usersResult = await db.execute({
 		sql: `
 			SELECT id, name, login_id, created_at, use_unified_id, company_id
 			FROM students
@@ -55,7 +59,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
-	createUser: async ({ request }) => {
+	createUser: async ({ request, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const company_id = data.get('company_id')?.toString();
 		const employee_number = data.get('employee_number')?.toString();
@@ -81,7 +90,7 @@ export const actions = {
 		const passwordHash = await bcrypt.hash(password, 10);
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'INSERT INTO students (login_id, password_hash, company_id, name, use_unified_id) VALUES (?, ?, ?, ?, ?)',
 				args: [login_id, passwordHash, parseInt(company_id), name, 0]
 			});
@@ -93,7 +102,12 @@ export const actions = {
 		}
 	},
 
-	deleteUser: async ({ request }) => {
+	deleteUser: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const id = data.get('id')?.toString();
 
@@ -102,7 +116,7 @@ export const actions = {
 		}
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM students WHERE id = ?',
 				args: [parseInt(id)]
 			});

@@ -1,35 +1,22 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const user = locals.user;
 
-	// サイドバー用のコンテンツ一覧を取得
-	const contentsResult = await turso.execute({
-		sql: `
-			SELECT id, title, sidebar_icon, sidebar_order
-			FROM contents
-			WHERE show_in_sidebar = 1
-			ORDER BY sidebar_order ASC, created_at ASC
-		`
-	});
-
-	const contents = contentsResult.rows.map((row) => ({
-		id: row.id as number,
-		title: row.title as string,
-		sidebar_icon: row.sidebar_icon as string,
-		sidebar_order: row.sidebar_order as number
-	}));
-
 	return {
 		user,
-		contents
+		contents: []
 	};
 };
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const title = data.get('title')?.toString();
 		const description = data.get('description')?.toString();
@@ -49,7 +36,7 @@ export const actions = {
 
 		try {
 			// コンテンツを作成
-			const contentResult = await turso.execute({
+			const contentResult = await db.execute({
 				sql: 'INSERT INTO contents (title, description, content_type, content_url, category, "order", show_in_sidebar, sidebar_icon, sidebar_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
 				args: [
 					title,
@@ -70,7 +57,7 @@ export const actions = {
 			if (sectionsJson) {
 				const sections = JSON.parse(sectionsJson);
 				for (const section of sections) {
-					await turso.execute({
+					await db.execute({
 						sql: 'INSERT INTO content_sections (content_id, section_type, title, items, "order") VALUES (?, ?, ?, ?, ?)',
 						args: [
 							contentId,

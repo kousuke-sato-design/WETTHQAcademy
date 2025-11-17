@@ -1,11 +1,15 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	// 企業一覧を取得
-	const companiesResult = await turso.execute('SELECT id, company_name FROM companies ORDER BY company_name');
+	const companiesResult = await db.execute('SELECT id, company_name FROM companies ORDER BY company_name');
 
 	const companies = companiesResult.rows.map((row) => ({
 		id: row.id as number,
@@ -13,7 +17,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}));
 
 	// 担当者一覧を取得（company_adminsテーブルから）
-	const staffResult = await turso.execute(`
+	const staffResult = await db.execute(`
 		SELECT ca.id, ca.name, ca.login_id, ca.created_at, c.company_name, ca.company_id
 		FROM company_admins ca
 		LEFT JOIN companies c ON ca.company_id = c.id
@@ -37,7 +41,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
-	createStaff: async ({ request }) => {
+	createStaff: async ({ request, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const company_id = data.get('company_id')?.toString();
 		const name = data.get('name')?.toString();
@@ -58,7 +67,7 @@ export const actions = {
 			const passwordHash = await bcrypt.hash(password, 10);
 
 			// 担当者を登録
-			await turso.execute({
+			await db.execute({
 				sql: 'INSERT INTO company_admins (login_id, password_hash, company_id, name) VALUES (?, ?, ?, ?)',
 				args: [login_id, passwordHash, parseInt(company_id), name]
 			});
@@ -70,7 +79,12 @@ export const actions = {
 		}
 	},
 
-	updateStaff: async ({ request }) => {
+	updateStaff: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const id = data.get('id')?.toString();
 		const company_id = data.get('company_id')?.toString();
@@ -92,13 +106,13 @@ export const actions = {
 			// パスワードを変更する場合
 			if (password) {
 				const passwordHash = await bcrypt.hash(password, 10);
-				await turso.execute({
+				await db.execute({
 					sql: 'UPDATE company_admins SET login_id = ?, password_hash = ?, company_id = ?, name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
 					args: [login_id, passwordHash, parseInt(company_id), name, parseInt(id)]
 				});
 			} else {
 				// パスワードを変更しない場合
-				await turso.execute({
+				await db.execute({
 					sql: 'UPDATE company_admins SET login_id = ?, company_id = ?, name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
 					args: [login_id, parseInt(company_id), name, parseInt(id)]
 				});
@@ -111,7 +125,12 @@ export const actions = {
 		}
 	},
 
-	deleteStaff: async ({ request }) => {
+	deleteStaff: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const id = data.get('id')?.toString();
 
@@ -120,7 +139,7 @@ export const actions = {
 		}
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM company_admins WHERE id = ?',
 				args: [parseInt(id)]
 			});

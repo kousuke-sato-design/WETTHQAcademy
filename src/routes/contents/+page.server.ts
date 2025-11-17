@@ -1,7 +1,11 @@
 import type { PageServerLoad } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const user = locals.user;
 	const category = url.searchParams.get('category');
 
@@ -10,7 +14,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	// カテゴリ一覧を取得
-	const categoriesResult = await turso.execute({
+	const categoriesResult = await db.execute({
 		sql: 'SELECT DISTINCT category FROM contents WHERE category IS NOT NULL',
 		args: []
 	});
@@ -26,7 +30,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		args = [category];
 	}
 
-	const result = await turso.execute({ sql, args });
+	const result = await db.execute({ sql, args });
 
 	const contents = result.rows.map((row) => ({
 		id: row.id as number,

@@ -1,8 +1,12 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const contentId = params.id;
 	const user = locals.user;
 	const companyId = user?.company_id;
@@ -10,7 +14,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	// この企業が閲覧許可を持っているコンテンツのみを取得（サイドバー用）
 	let contentsResult;
 	if (companyId) {
-		contentsResult = await turso.execute({
+		contentsResult = await db.execute({
 			sql: `
 				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order
 				FROM contents c
@@ -23,7 +27,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		});
 	} else {
 		// 統一IDユーザーの場合は全てのコンテンツを表示
-		contentsResult = await turso.execute({
+		contentsResult = await db.execute({
 			sql: `
 				SELECT id, title, sidebar_icon, sidebar_order
 				FROM contents
@@ -36,14 +40,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const contents = contentsResult.rows.map((row) => ({
 		id: row.id as number,
 		title: row.title as string,
-		sidebar_icon: row.sidebar_icon as string,
-		sidebar_order: row.sidebar_order as number
+		sidebar_icon: (row.sidebar_icon as string) || 'document',
+		sidebar_order: typeof row.sidebar_order === 'number' ? row.sidebar_order : 0
 	}));
 
 	// コンテンツ詳細を取得（閲覧許可チェック付き）
 	let contentResult;
 	if (companyId) {
-		contentResult = await turso.execute({
+		contentResult = await db.execute({
 			sql: `
 				SELECT c.id, c.title, c.description, c.category
 				FROM contents c
@@ -54,7 +58,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		});
 	} else {
 		// 統一IDユーザーの場合は全てのコンテンツにアクセス可能
-		contentResult = await turso.execute({
+		contentResult = await db.execute({
 			sql: `
 				SELECT id, title, description, category
 				FROM contents
@@ -76,7 +80,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	};
 
 	// セクションを取得
-	const sectionsResult = await turso.execute({
+	const sectionsResult = await db.execute({
 		sql: `
 			SELECT id, section_type, title, items, "order"
 			FROM content_sections
@@ -86,13 +90,22 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		args: [parseInt(contentId)]
 	});
 
-	const sections = sectionsResult.rows.map((row) => ({
-		id: row.id as number,
-		sectionType: row.section_type as string,
-		title: row.title as string | null,
-		items: JSON.parse(row.items as string),
-		order: row.order as number
-	}));
+	const sections = sectionsResult.rows.map((row) => {
+		let items = [];
+		try {
+			items = row.items && typeof row.items === 'string' ? JSON.parse(row.items) : [];
+		} catch (e) {
+			console.error('Failed to parse section items:', e);
+			items = [];
+		}
+		return {
+			id: row.id as number,
+			sectionType: row.section_type as string,
+			title: row.title as string | null,
+			items,
+			order: row.order as number
+		};
+	});
 
 	return {
 		user: locals.user,

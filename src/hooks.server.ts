@@ -1,8 +1,14 @@
 import { deserializeUser } from '$lib/auth/auth';
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
+import { getD1Client } from '$lib/db/d1';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Cloudflare D1バインディングを取得
+	if (event.platform?.env?.DB) {
+		event.locals.db = getD1Client(event.platform.env.DB);
+	}
+
 	const session = event.cookies.get('session');
 
 	if (session) {

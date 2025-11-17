@@ -1,11 +1,15 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	// 企業担当者を取得（company_adminsテーブルから）
-	const usersResult = await turso.execute(`
+	const usersResult = await db.execute(`
 		SELECT
 			ca.id,
 			ca.name,
@@ -30,7 +34,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}));
 
 	// 企業一覧を取得（プルダウン用）
-	const companiesResult = await turso.execute(`
+	const companiesResult = await db.execute(`
 		SELECT id, company_name, company_code
 		FROM companies
 		ORDER BY company_name ASC
@@ -50,7 +54,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
-	createUser: async ({ request }) => {
+	createUser: async ({ request, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const company_id = data.get('company_id')?.toString();
 		const employee_number = data.get('employee_number')?.toString();
@@ -76,7 +85,7 @@ export const actions = {
 		const passwordHash = await bcrypt.hash(password, 10);
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'INSERT INTO company_admins (login_id, password_hash, company_id, name) VALUES (?, ?, ?, ?)',
 				args: [login_id, passwordHash, parseInt(company_id), name]
 			});
@@ -88,7 +97,12 @@ export const actions = {
 		}
 	},
 
-	deleteUser: async ({ request }) => {
+	deleteUser: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const id = data.get('id')?.toString();
 
@@ -97,7 +111,7 @@ export const actions = {
 		}
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM company_admins WHERE id = ?',
 				args: [parseInt(id)]
 			});

@@ -1,6 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { turso } from '$lib/db/turso';
 import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -13,7 +12,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	default: async ({ request, cookies, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const company_code = data.get('company_code')?.toString();
 		const login_id = data.get('login_id')?.toString();
@@ -36,7 +40,7 @@ export const actions = {
 			// 統一IDユーザーの場合（login_id = "user"）
 			if (login_id === 'user') {
 				// 統一IDユーザーを検索
-				const result = await turso.execute({
+				const result = await db.execute({
 					sql: `
 						SELECT id, login_id, password_hash, company_id, name, use_unified_id
 						FROM students
@@ -60,7 +64,7 @@ export const actions = {
 				}
 
 				// 企業コードから企業IDを取得（統一IDユーザーの場合、ログイン時に企業を指定）
-				const companyResult = await turso.execute({
+				const companyResult = await db.execute({
 					sql: 'SELECT id FROM companies WHERE company_code = ?',
 					args: [company_code]
 				});
@@ -88,7 +92,7 @@ export const actions = {
 
 			// 個別IDユーザーの場合
 			// 企業コードから企業IDを取得
-			const companyResult = await turso.execute({
+			const companyResult = await db.execute({
 				sql: 'SELECT id FROM companies WHERE company_code = ?',
 				args: [company_code]
 			});
@@ -100,7 +104,7 @@ export const actions = {
 			const company_id = companyResult.rows[0].id as number;
 
 			// ユーザーを検索（企業ID、ログインIDで検索）
-			const result = await turso.execute({
+			const result = await db.execute({
 				sql: `
 					SELECT id, login_id, password_hash, company_id, name, use_unified_id
 					FROM students

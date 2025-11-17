@@ -2,8 +2,8 @@
 
 ## プロジェクト概要
 **目的**: 企業向けストレスチェック知識補完プラットフォーム
-**技術**: SvelteKit + Turso (libSQL) + TypeScript + Tailwind CSS
-**ホスティング**: Vercel
+**技術**: SvelteKit + Cloudflare D1 + TypeScript + Tailwind CSS
+**ホスティング**: Cloudflare Pages
 
 ## ユーザーロール
 1. **マスター管理者** (`/admin/login`) - 全機能アクセス
@@ -27,7 +27,7 @@
 
 ### コンテンツ管理
 - セクション形式のコンテンツ（導入/本文/動画解説など）
-- YouTube動画埋め込み
+- YouTube/Vimeo動画埋め込み
 - マークダウン対応
 - 企業別権限管理
 
@@ -44,10 +44,31 @@
 | `/admin/contents/[id]/edit` | コンテンツ編集 | - |
 | `/user/contents/[id]` | コンテンツ閲覧 | - |
 
-## 環境変数
+## Cloudflare設定
+### D1データベース
+- **Database Name**: webthqacademy-db
+- **Database ID**: c72094d5-6b99-4afe-9d3e-aee016b5a10d
+- **Binding Name**: DB
+
+### デプロイメント
 ```bash
-TURSO_DATABASE_URL="libsql://..."
-TURSO_AUTH_TOKEN="..."
+# ビルド
+npm run build
+
+# デプロイ
+npm run deploy
+
+# ローカル開発（D1付き）
+npm run dev
+```
+
+### マイグレーション
+```bash
+# スキーマ作成
+npm run db:migrate
+
+# シードデータ投入
+npm run db:seed
 ```
 
 ## 実装済み機能
@@ -57,8 +78,11 @@ TURSO_AUTH_TOKEN="..."
 - ✅ 企業別コンテンツ権限
 - ✅ レスポンシブデザイン
 - ✅ ロール別サイドバー
+- ✅ Cloudflare D1移行完了
+- ✅ Cloudflare Pages デプロイ
 
 ## 今後の拡張予定
 - 学習進捗管理
 - 修了証発行
 - コンテンツ検索
+- Cloudflare R2による動画アップロード機能

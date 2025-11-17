@@ -180,7 +180,7 @@
 									<div class="text-sm text-gray-600">{formatDate(content.created_at)}</div>
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm">
-									<a href="/admin/contents/{content.id}/edit" class="text-blue-600 hover:text-blue-700 font-medium mr-3">編集</a>
+									<a href="/admin/contents/edit/{content.id}" class="text-blue-600 hover:text-blue-700 font-medium mr-3">編集</a>
 									<button
 										on:click={() => openDeleteModal(content)}
 										class="text-red-600 hover:text-red-700 font-medium"

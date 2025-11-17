@@ -1,13 +1,17 @@
 import { fail, redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const contentId = parseInt(params.id);
 
-	// コンテンツ情報を取得
-	const contentResult = await turso.execute({
-		sql: 'SELECT * FROM contents WHERE id = ?',
+	// コンテンツ情報を取得（基本情報のみ）
+	const contentResult = await db.execute({
+		sql: 'SELECT id, title, description, category, "order" FROM contents WHERE id = ?',
 		args: [contentId]
 	});
 
@@ -18,55 +22,49 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const content = contentResult.rows[0];
 
 	// セクション情報を取得
-	const sectionsResult = await turso.execute({
-		sql: 'SELECT * FROM content_sections WHERE content_id = ? ORDER BY "order" ASC',
+	const sectionsResult = await db.execute({
+		sql: 'SELECT id, content_id, section_type, title, items, "order" FROM content_sections WHERE content_id = ? ORDER BY "order" ASC',
 		args: [contentId]
 	});
 
-	const sections = sectionsResult.rows.map((row) => ({
-		id: row.id as number,
-		content_id: row.content_id as number,
-		section_type: row.section_type as string,
-		title: row.title as string | null,
-		items: row.items ? JSON.parse(row.items as string) : [],
-		order: row.order as number,
-		created_at: row.created_at as string
-	}));
-
-	// サイドバー用のコンテンツ一覧を取得
-	const contentsResult = await turso.execute({
-		sql: `
-			SELECT id, title, sidebar_icon, sidebar_order
-			FROM contents
-			WHERE show_in_sidebar = 1
-			ORDER BY sidebar_order ASC, created_at ASC
-		`
+	const sections = sectionsResult.rows.map((row) => {
+		let items = [];
+		try {
+			items = row.items && typeof row.items === 'string' ? JSON.parse(row.items) : [];
+		} catch (e) {
+			items = [];
+		}
+		return {
+			id: row.id as number,
+			content_id: row.content_id as number,
+			section_type: row.section_type as string,
+			title: row.title as string | null,
+			items,
+			order: row.order as number
+		};
 	});
-
-	const contents = contentsResult.rows.map((row) => ({
-		id: row.id as number,
-		title: row.title as string,
-		sidebar_icon: row.sidebar_icon as string,
-		sidebar_order: row.sidebar_order as number
-	}));
 
 	return {
 		user: locals.user,
-		contents,
+		contents: [],
 		content: {
 			id: content.id as number,
-			title: content.title as string,
-			description: content.description as string | null,
-			category: content.category as string | null,
-			order: content.order as number,
-			created_at: content.created_at as string
+			title: (content.title as string) || '',
+			description: (content.description as string) || null,
+			category: (content.category as string) || null,
+			order: typeof content.order === 'number' ? content.order : 0
 		},
 		sections
 	};
 };
 
 export const actions = {
-	default: async ({ request, params }) => {
+	default: async ({ request, params, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const contentId = parseInt(params.id);
 		const data = await request.formData();
 		const title = data.get('title')?.toString();
@@ -86,7 +84,7 @@ export const actions = {
 			console.log('Updating content:', { contentId, title, sectionsJson });
 
 			// コンテンツを更新
-			await turso.execute({
+			await db.execute({
 				sql: 'UPDATE contents SET title = ?, description = ?, category = ?, "order" = ? WHERE id = ?',
 				args: [
 					title,
@@ -98,7 +96,7 @@ export const actions = {
 			});
 
 			// 既存のセクションを削除
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM content_sections WHERE content_id = ?',
 				args: [contentId]
 			});
@@ -117,7 +115,7 @@ export const actions = {
 						order: section.order
 					});
 
-					await turso.execute({
+					await db.execute({
 						sql: 'INSERT INTO content_sections (content_id, section_type, title, items, "order") VALUES (?, ?, ?, ?, ?)',
 						args: [
 							contentId,

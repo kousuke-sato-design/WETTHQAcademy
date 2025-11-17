@@ -1,8 +1,12 @@
 import type { PageServerLoad } from './$types';
-import { turso } from '$lib/db/turso';
 import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	const user = locals.user;
 
 	if (!user) {
@@ -16,7 +20,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}
 
 	// コンテンツを取得
-	const result = await turso.execute({
+	const result = await db.execute({
 		sql: 'SELECT * FROM contents WHERE id = ?',
 		args: [contentId]
 	});
@@ -36,7 +40,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	};
 
 	// 関連コンテンツを取得
-	const relatedResult = await turso.execute({
+	const relatedResult = await db.execute({
 		sql: 'SELECT id, title, content_type, category FROM contents WHERE category = ? AND id != ? LIMIT 3',
 		args: [content.category, contentId]
 	});

@@ -1,10 +1,14 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	// コンテンツ一覧を取得
-	const contentsResult = await turso.execute(`
+	const contentsResult = await db.execute(`
 		SELECT id, title, description, content_type, content_url, category, "order", created_at
 		FROM contents
 		ORDER BY "order" ASC, created_at DESC
@@ -28,7 +32,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
-	createContent: async ({ request }) => {
+	createContent: async ({ request, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const title = data.get('title')?.toString();
 		const description = data.get('description')?.toString();
@@ -51,7 +60,7 @@ export const actions = {
 		}
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'INSERT INTO contents (title, description, content_type, content_url, category, "order") VALUES (?, ?, ?, ?, ?, ?)',
 				args: [
 					title,
@@ -70,7 +79,12 @@ export const actions = {
 		}
 	},
 
-	deleteContent: async ({ request }) => {
+	deleteContent: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const id = data.get('id')?.toString();
 
@@ -79,7 +93,7 @@ export const actions = {
 		}
 
 		try {
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM contents WHERE id = ?',
 				args: [parseInt(id)]
 			});

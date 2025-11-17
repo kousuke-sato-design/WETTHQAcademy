@@ -1,10 +1,14 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { turso } from '$lib/db/turso';
 import { verifyCredentials } from '$lib/auth/auth';
 
 export const actions = {
-	login: async ({ request, cookies }) => {
+	login: async ({ request, cookies, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const login_id = data.get('login_id')?.toString();
 		const password = data.get('password')?.toString();
@@ -13,7 +17,7 @@ export const actions = {
 			return fail(400, { error: 'ログインIDとパスワードを入力してください' });
 		}
 
-		const user = await verifyCredentials(turso, login_id, password, 'company_admin');
+		const user = await verifyCredentials(db, login_id, password, 'company_admin');
 
 		if (!user) {
 			return fail(401, { error: 'ログインIDまたはパスワードが正しくありません' });

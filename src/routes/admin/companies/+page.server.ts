@@ -1,11 +1,15 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { turso } from '$lib/db/turso';
 import bcrypt from 'bcryptjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
+	const db = locals.db;
+	if (!db) {
+		throw new Error('Database not available');
+	}
+
 	// 企業一覧を取得（担当者数と生徒数も含む）
-	const companiesResult = await turso.execute(`
+	const companiesResult = await db.execute(`
 		SELECT
 			c.id,
 			c.company_name,
@@ -35,7 +39,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
-	createCompany: async ({ request }) => {
+	createCompany: async ({ request, locals}) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const company_name = data.get('company_name')?.toString();
 		const company_code = data.get('company_code')?.toString();
@@ -52,7 +61,7 @@ export const actions = {
 
 		try {
 			// 企業コードの重複チェック
-			const existingCompany = await turso.execute({
+			const existingCompany = await db.execute({
 				sql: 'SELECT id FROM companies WHERE company_code = ?',
 				args: [company_code]
 			});
@@ -62,7 +71,7 @@ export const actions = {
 			}
 
 			// 企業を登録
-			const companyResult = await turso.execute({
+			const companyResult = await db.execute({
 				sql: 'INSERT INTO companies (company_name, company_code) VALUES (?, ?) RETURNING id',
 				args: [company_name, company_code]
 			});
@@ -74,7 +83,7 @@ export const actions = {
 			const unifiedPassword = '14541454';
 			const passwordHash = await bcrypt.hash(unifiedPassword, 10);
 
-			await turso.execute({
+			await db.execute({
 				sql: 'INSERT INTO students (login_id, password_hash, company_id, name, use_unified_id) VALUES (?, ?, ?, ?, ?)',
 				args: ['user', passwordHash, companyId, '統一ID生徒', 1]
 			});
@@ -86,7 +95,12 @@ export const actions = {
 		}
 	},
 
-	deleteCompany: async ({ request }) => {
+	deleteCompany: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
 		const data = await request.formData();
 		const id = data.get('id')?.toString();
 
@@ -96,7 +110,7 @@ export const actions = {
 
 		try {
 			// 企業を削除（CASCADE設定により関連する担当者と生徒も削除される）
-			await turso.execute({
+			await db.execute({
 				sql: 'DELETE FROM companies WHERE id = ?',
 				args: [parseInt(id)]
 			});

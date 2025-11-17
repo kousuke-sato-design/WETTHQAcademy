@@ -1,0 +1,9 @@
+name = "webthqacademy"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# D1データベースのバインディング
+[[d1_databases]]
+binding = "DB"
+database_name = "webthqacademy-db"
+database_id = "c72094d5-6b99-4afe-9d3e-aee016b5a10d"
