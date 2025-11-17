@@ -10,10 +10,12 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const contentId = params.id;
 	const user = locals.user;
 	const companyId = user?.company_id;
+	const isCompanyAdmin = user?.role === 'company_admin';
 
 	// この企業が閲覧許可を持っているコンテンツのみを取得（サイドバー用）
 	let contentsResult;
-	if (companyId) {
+	if (companyId && !isCompanyAdmin) {
+		// 生徒の場合は許可されたコンテンツのみ
 		contentsResult = await db.execute({
 			sql: `
 				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order
@@ -26,7 +28,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 			args: [companyId]
 		});
 	} else {
-		// 統一IDユーザーの場合は全てのコンテンツを表示
+		// 統一IDユーザーまたは企業担当者の場合は全てのコンテンツを表示
 		contentsResult = await db.execute({
 			sql: `
 				SELECT id, title, sidebar_icon, sidebar_order
@@ -46,7 +48,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 	// コンテンツ詳細を取得（閲覧許可チェック付き、sectionsカラムも含む）
 	let contentResult;
-	if (companyId) {
+	if (companyId && !isCompanyAdmin) {
+		// 生徒の場合は許可されたコンテンツのみ
 		contentResult = await db.execute({
 			sql: `
 				SELECT c.id, c.title, c.description, c.category, c.sections
@@ -57,7 +60,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 			args: [parseInt(contentId), companyId]
 		});
 	} else {
-		// 統一IDユーザーの場合は全てのコンテンツにアクセス可能
+		// 統一IDユーザーまたは企業担当者の場合は全てのコンテンツにアクセス可能
 		contentResult = await db.execute({
 			sql: `
 				SELECT id, title, description, category, sections
