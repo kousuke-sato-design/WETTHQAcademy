@@ -23,12 +23,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 	});
 	const totalContents = contentsResult.rows[0].count as number;
 
-	// この企業が閲覧許可を持っているコンテンツ数を取得
-	const permittedResult = await db.execute({
-		sql: 'SELECT COUNT(*) as count FROM company_content_permissions WHERE company_id = ?',
-		args: [user.company_id]
-	});
-	const permittedContents = permittedResult.rows[0].count as number;
+	// この企業が閲覧許可を持っているコンテンツ数を取得（テーブルが存在しない場合は0）
+	let permittedContents = 0;
+	try {
+		const permittedResult = await db.execute({
+			sql: 'SELECT COUNT(*) as count FROM company_content_permissions WHERE company_id = ?',
+			args: [user.company_id]
+		});
+		permittedContents = permittedResult.rows[0].count as number;
+	} catch (err) {
+		console.error('company_content_permissions table not found:', err);
+		permittedContents = 0;
+	}
 
 	return {
 		user: locals.user,
