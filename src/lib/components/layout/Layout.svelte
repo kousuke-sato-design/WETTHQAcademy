@@ -61,11 +61,11 @@
 			{sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
 			md:block
 		">
-			{#if user.role === 'master'}
+			{#if user && user.role === 'master'}
 				<AdminSidebar {user} />
-			{:else if user.role === 'company_admin'}
+			{:else if user && user.role === 'company_admin'}
 				<CompanySidebar {user} />
-			{:else if user.role === 'user'}
+			{:else if user && user.role === 'user'}
 				<UserSidebar {user} {contents} on:linkClick={closeSidebar} />
 			{/if}
 		</div>
