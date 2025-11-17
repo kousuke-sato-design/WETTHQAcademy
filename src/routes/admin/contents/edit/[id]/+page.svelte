@@ -12,32 +12,47 @@
 	let category = data.content.category || '';
 	let order = data.content.order.toString();
 
-	// セクションデータ（既存データから初期化）
-	type Item = {
-		type: 'heading' | 'text' | 'video' | 'image';
-		content: string;
-	};
+	// セクションタイプ
+	type SectionType = 'text' | 'attachment' | 'video';
 
 	type Section = {
+		type: SectionType;
 		title: string;
-		sectionType: string;
-		items: Item[];
+		content: string;
 		order: number;
 	};
 
-	let sections: Section[] = data.sections.map((s: any) => ({
-		title: s.title || '',
-		sectionType: s.section_type || 'text',
-		items: Array.isArray(s.items) ? s.items : [],
-		order: s.order || 0
-	}));
+	// 既存データから初期化
+	let sections: Section[] = [];
+	if (data.sections && data.sections.length > 0) {
+		sections = data.sections.map((s: any, index: number) => {
+			// section_typeとitemsから適切な形式に変換
+			let content = '';
+			if (Array.isArray(s.items) && s.items.length > 0) {
+				if (s.items[0].type === 'video') {
+					content = s.items[0].content || '';
+				} else if (s.items[0].type === 'text') {
+					content = s.items.map((item: any) => item.content).join('\n\n');
+				} else {
+					content = s.items[0].content || '';
+				}
+			}
+
+			return {
+				type: (s.section_type === 'video' ? 'video' : s.section_type === 'attachment' ? 'attachment' : 'text') as SectionType,
+				title: s.title || '',
+				content: content,
+				order: index
+			};
+		});
+	}
 
 	// セクションを追加
-	function addSection() {
+	function addSection(type: SectionType) {
 		sections = [...sections, {
+			type,
 			title: '',
-			sectionType: 'text',
-			items: [],
+			content: '',
 			order: sections.length
 		}];
 	}
@@ -47,21 +62,6 @@
 		sections = sections.filter((_, i) => i !== index);
 		// 順序を再調整
 		sections = sections.map((s, i) => ({ ...s, order: i }));
-	}
-
-	// セクション内にアイテムを追加
-	function addItem(sectionIndex: number, itemType: 'heading' | 'text' | 'video' | 'image') {
-		sections[sectionIndex].items = [...sections[sectionIndex].items, {
-			type: itemType,
-			content: ''
-		}];
-		sections = sections;
-	}
-
-	// アイテムを削除
-	function removeItem(sectionIndex: number, itemIndex: number) {
-		sections[sectionIndex].items = sections[sectionIndex].items.filter((_, i) => i !== itemIndex);
-		sections = sections;
 	}
 
 	// セクションを上に移動
@@ -76,6 +76,24 @@
 		if (index === sections.length - 1) return;
 		[sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
 		sections = sections.map((s, i) => ({ ...s, order: i }));
+	}
+
+	// セクションタイプの日本語表示
+	function getSectionTypeLabel(type: SectionType): string {
+		switch (type) {
+			case 'text': return 'HTMLテキスト';
+			case 'attachment': return 'Google Drive添付';
+			case 'video': return '動画URL';
+		}
+	}
+
+	// セクションタイプの色
+	function getSectionTypeColor(type: SectionType): string {
+		switch (type) {
+			case 'text': return 'bg-blue-100 text-blue-800 border-blue-300';
+			case 'attachment': return 'bg-green-100 text-green-800 border-green-300';
+			case 'video': return 'bg-purple-100 text-purple-800 border-purple-300';
+		}
 	}
 
 	// 動画URLを埋め込み形式に変換
@@ -96,6 +114,29 @@
 
 		return url;
 	}
+
+	// 保存時にデータベース形式に変換
+	function prepareSectionsForSave() {
+		return sections.map(section => {
+			let items = [];
+			if (section.type === 'text') {
+				// HTMLテキストを段落に分割
+				const paragraphs = section.content.split('\n\n').filter(p => p.trim());
+				items = paragraphs.map(p => ({ type: 'text', content: p }));
+			} else if (section.type === 'video') {
+				items = [{ type: 'video', content: section.content }];
+			} else if (section.type === 'attachment') {
+				items = [{ type: 'attachment', content: section.content }];
+			}
+
+			return {
+				title: section.title,
+				sectionType: section.type,
+				items: items,
+				order: section.order
+			};
+		});
+	}
 </script>
 
 <svelte:head>
@@ -112,7 +153,7 @@
 				</a>
 			</div>
 			<h1 class="text-3xl font-bold text-gray-900 mb-2">コンテンツ編集</h1>
-			<p class="text-gray-600">セクションを組み立ててコンテンツを作成します</p>
+			<p class="text-gray-600">セクションを追加してコンテンツを作成します</p>
 		</div>
 
 		<!-- 成功メッセージ -->
@@ -203,146 +244,130 @@
 						</div>
 					</div>
 
-					<!-- セクション編集 -->
+					<!-- セクション追加ボタン -->
 					<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-						<div class="flex items-center justify-between mb-6 pb-3 border-b border-gray-200">
-							<h2 class="text-lg font-semibold text-gray-900">セクション構成</h2>
+						<h2 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">セクション追加</h2>
+
+						<div class="grid grid-cols-3 gap-3">
 							<button
 								type="button"
-								on:click={addSection}
-								class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+								on:click={() => addSection('text')}
+								class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
 							>
-								+ セクション追加
+								HTMLテキスト
+							</button>
+							<button
+								type="button"
+								on:click={() => addSection('attachment')}
+								class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+							>
+								Google Drive添付
+							</button>
+							<button
+								type="button"
+								on:click={() => addSection('video')}
+								class="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+							>
+								動画URL
 							</button>
 						</div>
+					</div>
 
-						{#if sections.length === 0}
-							<div class="text-center py-8 text-gray-500">
-								<p>セクションがありません。「+ セクション追加」ボタンでセクションを追加してください。</p>
-							</div>
-						{:else}
-							<div class="space-y-6">
-								{#each sections as section, sectionIndex}
-									<div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+					<!-- セクション一覧 -->
+					{#if sections.length > 0}
+						<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+							<h2 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">セクション一覧</h2>
+
+							<div class="space-y-4">
+								{#each sections as section, index}
+									<div class="border-2 {getSectionTypeColor(section.type)} rounded-lg p-4">
 										<!-- セクションヘッダー -->
-										<div class="flex items-center justify-between mb-4">
-											<input
-												type="text"
-												bind:value={section.title}
-												placeholder="セクションタイトル"
-												class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-											/>
-											<div class="flex items-center space-x-2 ml-3">
+										<div class="flex items-center justify-between mb-3">
+											<span class="px-3 py-1 {getSectionTypeColor(section.type)} text-sm font-semibold rounded-full">
+												{getSectionTypeLabel(section.type)}
+											</span>
+											<div class="flex items-center space-x-2">
 												<button
 													type="button"
-													on:click={() => moveSectionUp(sectionIndex)}
-													disabled={sectionIndex === 0}
-													class="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed"
+													on:click={() => moveSectionUp(index)}
+													disabled={index === 0}
+													class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
 													title="上に移動"
 												>
 													↑
 												</button>
 												<button
 													type="button"
-													on:click={() => moveSectionDown(sectionIndex)}
-													disabled={sectionIndex === sections.length - 1}
-													class="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed"
+													on:click={() => moveSectionDown(index)}
+													disabled={index === sections.length - 1}
+													class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
 													title="下に移動"
 												>
 													↓
 												</button>
 												<button
 													type="button"
-													on:click={() => removeSection(sectionIndex)}
-													class="p-2 text-red-600 hover:text-red-800"
+													on:click={() => removeSection(index)}
+													class="px-2 py-1 text-red-600 hover:text-red-800 font-bold"
 													title="削除"
 												>
-													🗑
+													✕
 												</button>
 											</div>
 										</div>
 
-										<!-- アイテム追加ボタン -->
-										<div class="flex flex-wrap gap-2 mb-4">
-											<button
-												type="button"
-												on:click={() => addItem(sectionIndex, 'heading')}
-												class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm rounded-lg"
-											>
-												+ 見出し
-											</button>
-											<button
-												type="button"
-												on:click={() => addItem(sectionIndex, 'text')}
-												class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm rounded-lg"
-											>
-												+ テキスト
-											</button>
-											<button
-												type="button"
-												on:click={() => addItem(sectionIndex, 'video')}
-												class="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 text-sm rounded-lg"
-											>
-												+ 動画URL
-											</button>
-											<button
-												type="button"
-												on:click={() => addItem(sectionIndex, 'image')}
-												class="px-3 py-1 bg-pink-100 hover:bg-pink-200 text-pink-800 text-sm rounded-lg"
-											>
-												+ 画像URL
-											</button>
+										<!-- タイトル -->
+										<div class="mb-3">
+											<label class="block text-sm font-medium text-gray-700 mb-1">
+												セクションタイトル
+											</label>
+											<input
+												type="text"
+												bind:value={section.title}
+												placeholder="セクションのタイトル（任意）"
+												class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+											/>
 										</div>
 
-										<!-- アイテム一覧 -->
-										{#if section.items.length > 0}
-											<div class="space-y-3">
-												{#each section.items as item, itemIndex}
-													<div class="flex items-start space-x-2 bg-white p-3 rounded-lg border border-gray-200">
-														<div class="flex-1">
-															<div class="text-xs font-medium text-gray-500 mb-1">
-																{item.type === 'heading' ? '見出し' : item.type === 'text' ? 'テキスト' : item.type === 'video' ? '動画URL' : '画像URL'}
-															</div>
-															{#if item.type === 'text'}
-																<textarea
-																	bind:value={item.content}
-																	rows="3"
-																	placeholder="テキストを入力"
-																	class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-																></textarea>
-															{:else}
-																<input
-																	type="text"
-																	bind:value={item.content}
-																	placeholder={item.type === 'heading' ? '見出しを入力' : item.type === 'video' ? 'YouTube/VimeoのURL' : '画像のURL'}
-																	class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-																/>
-															{/if}
-														</div>
-														<button
-															type="button"
-															on:click={() => removeItem(sectionIndex, itemIndex)}
-															class="text-red-600 hover:text-red-800 mt-6"
-															title="削除"
-														>
-															✕
-														</button>
-													</div>
-												{/each}
-											</div>
-										{:else}
-											<div class="text-center py-4 text-sm text-gray-500 bg-white rounded-lg border border-gray-200">
-												アイテムがありません。上のボタンでアイテムを追加してください。
-											</div>
-										{/if}
+										<!-- コンテンツ -->
+										<div>
+											<label class="block text-sm font-medium text-gray-700 mb-1">
+												{#if section.type === 'text'}
+													HTMLテキスト
+												{:else if section.type === 'attachment'}
+													Google DriveのURL
+												{:else}
+													動画URL (YouTube/Vimeo)
+												{/if}
+											</label>
+											{#if section.type === 'text'}
+												<textarea
+													bind:value={section.content}
+													rows="6"
+													placeholder="HTMLやテキストを入力してください"
+													class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white"
+												></textarea>
+											{:else}
+												<input
+													type="text"
+													bind:value={section.content}
+													placeholder={section.type === 'attachment' ? 'https://drive.google.com/file/d/...' : 'https://www.youtube.com/watch?v=...'}
+													class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+												/>
+											{/if}
+										</div>
 									</div>
 								{/each}
 							</div>
-						{/if}
-					</div>
+						</div>
+					{:else}
+						<div class="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-300">
+							<p class="text-gray-600">セクションがありません。上のボタンからセクションを追加してください。</p>
+						</div>
+					{/if}
 
 					<!-- セクションデータをJSON形式で送信 -->
-					<input type="hidden" name="sections" value={JSON.stringify(sections)} />
+					<input type="hidden" name="sections" value={JSON.stringify(prepareSectionsForSave())} />
 
 					<!-- 保存ボタン -->
 					<div class="flex items-center justify-end space-x-3 pt-6">
@@ -403,31 +428,35 @@
 												<h2 class="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">{section.title}</h2>
 											{/if}
 
-											<div class="space-y-4">
-												{#each section.items as item}
-													{#if item.type === 'heading'}
-														<h3 class="text-lg font-semibold text-gray-800 mt-4">{item.content}</h3>
-													{:else if item.type === 'text'}
-														<p class="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">{item.content}</p>
-													{:else if item.type === 'video' && item.content}
-														<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-sm">
-															<iframe
-																src={convertToEmbedUrl(item.content)}
-																class="w-full h-full"
-																frameborder="0"
-																allowfullscreen
-																title="Video content"
-															></iframe>
-														</div>
-													{:else if item.type === 'image' && item.content}
-														<img
-															src={item.content}
-															alt=""
-															class="w-full rounded-lg shadow-sm"
-														/>
-													{/if}
-												{/each}
-											</div>
+											{#if section.type === 'text' && section.content}
+												<div class="prose max-w-none">
+													{@html section.content}
+												</div>
+											{:else if section.type === 'video' && section.content}
+												<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-sm">
+													<iframe
+														src={convertToEmbedUrl(section.content)}
+														class="w-full h-full"
+														frameborder="0"
+														allowfullscreen
+														title="Video content"
+													></iframe>
+												</div>
+											{:else if section.type === 'attachment' && section.content}
+												<div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+													<a
+														href={section.content}
+														target="_blank"
+														rel="noopener noreferrer"
+														class="flex items-center space-x-3 text-blue-600 hover:text-blue-700"
+													>
+														<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+														</svg>
+														<span class="font-medium">添付ファイルを開く</span>
+													</a>
+												</div>
+											{/if}
 										</div>
 									{/each}
 								</div>
