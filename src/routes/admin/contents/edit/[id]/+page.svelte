@@ -137,6 +137,10 @@
 			};
 		});
 	}
+
+	// トグル状態
+	let sectionListOpen = true;
+	let basicInfoOpen = false;
 </script>
 
 <svelte:head>
@@ -175,13 +179,136 @@
 			<!-- 左側: 編集フォーム -->
 			<div class="space-y-6">
 				<form method="POST" use:enhance class="space-y-6">
-					<!-- 基本情報 -->
-					<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-						<h2 class="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-200">基本情報</h2>
+					<!-- セクション一覧 (最上部・折りたたみ可能) -->
+					{#if sections.length > 0}
+						<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+							<button
+								type="button"
+								on:click={() => sectionListOpen = !sectionListOpen}
+								class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+							>
+								<h2 class="text-lg font-semibold text-gray-900">セクション一覧</h2>
+								<svg
+									class="w-5 h-5 text-gray-600 transition-transform {sectionListOpen ? 'rotate-180' : ''}"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							</button>
 
-						<div class="space-y-4">
-							<!-- タイトル -->
-							<div>
+							{#if sectionListOpen}
+								<div class="px-6 pb-6 border-t border-gray-200">
+									<div class="space-y-4 mt-4">
+										{#each sections as section, index}
+											<div class="border-2 {getSectionTypeColor(section.type)} rounded-lg p-4">
+												<!-- セクションヘッダー -->
+												<div class="flex items-center justify-between mb-3">
+													<span class="px-3 py-1 {getSectionTypeColor(section.type)} text-sm font-semibold rounded-full">
+														{getSectionTypeLabel(section.type)}
+													</span>
+													<div class="flex items-center space-x-2">
+														<button
+															type="button"
+															on:click={() => moveSectionUp(index)}
+															disabled={index === 0}
+															class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
+															title="上に移動"
+														>
+															↑
+														</button>
+														<button
+															type="button"
+															on:click={() => moveSectionDown(index)}
+															disabled={index === sections.length - 1}
+															class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
+															title="下に移動"
+														>
+															↓
+														</button>
+														<button
+															type="button"
+															on:click={() => removeSection(index)}
+															class="px-2 py-1 text-red-600 hover:text-red-800 font-bold"
+															title="削除"
+														>
+															✕
+														</button>
+													</div>
+												</div>
+
+												<!-- タイトル -->
+												<div class="mb-3">
+													<label class="block text-sm font-medium text-gray-700 mb-1">
+														セクションタイトル
+													</label>
+													<input
+														type="text"
+														bind:value={section.title}
+														placeholder="セクションのタイトル（任意）"
+														class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+													/>
+												</div>
+
+												<!-- コンテンツ -->
+												<div>
+													<label class="block text-sm font-medium text-gray-700 mb-1">
+														{#if section.type === 'text'}
+															HTMLテキスト
+														{:else if section.type === 'attachment'}
+															Google DriveのURL
+														{:else}
+															動画URL (YouTube/Vimeo)
+														{/if}
+													</label>
+													{#if section.type === 'text'}
+														<textarea
+															bind:value={section.content}
+															rows="6"
+															placeholder="HTMLやテキストを入力してください"
+															class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white"
+														></textarea>
+													{:else}
+														<input
+															type="text"
+															bind:value={section.content}
+															placeholder={section.type === 'attachment' ? 'https://drive.google.com/file/d/...' : 'https://www.youtube.com/watch?v=...'}
+															class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+														/>
+													{/if}
+												</div>
+											</div>
+										{/each}
+									</div>
+								</div>
+							{/if}
+						</div>
+					{/if}
+
+					<!-- 基本情報 (折りたたみ可能) -->
+					<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+						<button
+							type="button"
+							on:click={() => basicInfoOpen = !basicInfoOpen}
+							class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+						>
+							<h2 class="text-lg font-semibold text-gray-900">基本情報</h2>
+							<svg
+								class="w-5 h-5 text-gray-600 transition-transform {basicInfoOpen ? 'rotate-180' : ''}"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</button>
+
+						{#if basicInfoOpen}
+							<div class="px-6 pb-6 border-t border-gray-200">
+								<div class="space-y-4 mt-4">
+									<!-- タイトル -->
+									<div>
 								<label for="title" class="block text-sm font-medium text-gray-700 mb-2">
 									タイトル <span class="text-red-500">*</span>
 								</label>
@@ -240,8 +367,10 @@
 										class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 									/>
 								</div>
+									</div>
+								</div>
 							</div>
-						</div>
+						{/if}
 					</div>
 
 					<!-- セクション追加ボタン -->
@@ -272,99 +401,6 @@
 							</button>
 						</div>
 					</div>
-
-					<!-- セクション一覧 -->
-					{#if sections.length > 0}
-						<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-							<h2 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">セクション一覧</h2>
-
-							<div class="space-y-4">
-								{#each sections as section, index}
-									<div class="border-2 {getSectionTypeColor(section.type)} rounded-lg p-4">
-										<!-- セクションヘッダー -->
-										<div class="flex items-center justify-between mb-3">
-											<span class="px-3 py-1 {getSectionTypeColor(section.type)} text-sm font-semibold rounded-full">
-												{getSectionTypeLabel(section.type)}
-											</span>
-											<div class="flex items-center space-x-2">
-												<button
-													type="button"
-													on:click={() => moveSectionUp(index)}
-													disabled={index === 0}
-													class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
-													title="上に移動"
-												>
-													↑
-												</button>
-												<button
-													type="button"
-													on:click={() => moveSectionDown(index)}
-													disabled={index === sections.length - 1}
-													class="px-2 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
-													title="下に移動"
-												>
-													↓
-												</button>
-												<button
-													type="button"
-													on:click={() => removeSection(index)}
-													class="px-2 py-1 text-red-600 hover:text-red-800 font-bold"
-													title="削除"
-												>
-													✕
-												</button>
-											</div>
-										</div>
-
-										<!-- タイトル -->
-										<div class="mb-3">
-											<label class="block text-sm font-medium text-gray-700 mb-1">
-												セクションタイトル
-											</label>
-											<input
-												type="text"
-												bind:value={section.title}
-												placeholder="セクションのタイトル（任意）"
-												class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-											/>
-										</div>
-
-										<!-- コンテンツ -->
-										<div>
-											<label class="block text-sm font-medium text-gray-700 mb-1">
-												{#if section.type === 'text'}
-													HTMLテキスト
-												{:else if section.type === 'attachment'}
-													Google DriveのURL
-												{:else}
-													動画URL (YouTube/Vimeo)
-												{/if}
-											</label>
-											{#if section.type === 'text'}
-												<textarea
-													bind:value={section.content}
-													rows="6"
-													placeholder="HTMLやテキストを入力してください"
-													class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white"
-												></textarea>
-											{:else}
-												<input
-													type="text"
-													bind:value={section.content}
-													placeholder={section.type === 'attachment' ? 'https://drive.google.com/file/d/...' : 'https://www.youtube.com/watch?v=...'}
-													class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-												/>
-											{/if}
-										</div>
-									</div>
-								{/each}
-							</div>
-						</div>
-					{:else}
-						<div class="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-300">
-							<p class="text-gray-600">セクションがありません。上のボタンからセクションを追加してください。</p>
-						</div>
-					{/if}
 
 					<!-- セクションデータをJSON形式で送信 -->
 					<input type="hidden" name="sections" value={JSON.stringify(prepareSectionsForSave())} />
