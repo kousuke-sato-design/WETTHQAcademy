@@ -99,6 +99,31 @@
 											alt=""
 											class="w-full rounded-lg shadow-md"
 										/>
+									{:else if item.type === 'attachment' && item.content}
+										<div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+											<div class="flex items-center space-x-4">
+												<div class="flex-shrink-0">
+													<svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+													</svg>
+												</div>
+												<div class="flex-1 min-w-0">
+													<p class="text-sm font-medium text-gray-900 mb-1">添付ファイル</p>
+													<p class="text-xs text-gray-600 mb-3">Google Driveで開く</p>
+													<a
+														href={item.content}
+														target="_blank"
+														rel="noopener noreferrer"
+														class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+													>
+														<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+														</svg>
+														ダウンロード・閲覧
+													</a>
+												</div>
+											</div>
+										</div>
 									{/if}
 								{/each}
 							</div>
