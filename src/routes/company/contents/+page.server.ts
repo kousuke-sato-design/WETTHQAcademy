@@ -16,9 +16,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	// コンテンツ一覧を取得（生徒と同じ）
-	const contentsResult = await db.execute({
-		sql: 'SELECT * FROM contents ORDER BY "order" ASC'
-	});
+	let contentsResult;
+	try {
+		contentsResult = await db.execute({
+			sql: 'SELECT id, title, description, category, created_at, content_type FROM contents'
+		});
+	} catch (error) {
+		console.error('Error fetching contents:', error);
+		return {
+			user: locals.user,
+			contents: []
+		};
+	}
 
 	const contents = contentsResult.rows.map((row) => ({
 		id: row.id as number,
