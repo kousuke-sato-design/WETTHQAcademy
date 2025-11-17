@@ -17,46 +17,53 @@ export const load: PageServerLoad = async ({ locals }) => {
 		};
 	}
 
-	// この企業が閲覧許可を持っているコンテンツを取得
-	const permittedContentsResult = await db.execute({
-		sql: `
-			SELECT c.id, c.title, c.description, c.category, c.created_at
-			FROM contents c
-			INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
-			WHERE ccp.company_id = ?
-			ORDER BY c."order" ASC, c.created_at DESC
-		`,
-		args: [companyId]
-	});
+	try {
+		// 全コンテンツを取得（権限の有無を表示するため）
+		const allContentsResult = await db.execute({
+			sql: `SELECT id, title, description, category, created_at
+			      FROM contents
+			      ORDER BY "order" ASC, created_at DESC`
+		});
 
-	const permittedContents = permittedContentsResult.rows.map((row) => ({
-		id: row.id as number,
-		title: row.title as string,
-		description: (row.description as string) || '',
-		category: (row.category as string) || '',
-		created_at: row.created_at as string,
-		hasPermission: true
-	}));
+		// この企業が閲覧許可を持っているコンテンツIDを取得
+		let permittedIds = new Set<number>();
+		try {
+			const permissionsResult = await db.execute({
+				sql: `SELECT content_id FROM company_content_permissions WHERE company_id = ?`,
+				args: [companyId]
+			});
+			permittedIds = new Set(permissionsResult.rows.map((row) => row.content_id as number));
+		} catch (err) {
+			console.error('Error fetching permissions:', err);
+			// 権限テーブルが存在しない場合は空のセットを使用
+		}
 
-	// 全コンテンツを取得（権限の有無を表示するため）
-	const allContentsResult = await db.execute({
-		sql: 'SELECT id, title, description, category, created_at FROM contents ORDER BY "order" ASC, created_at DESC'
-	});
+		// 全コンテンツに権限情報を追加
+		const allContents = allContentsResult.rows.map((row) => ({
+			id: row.id as number,
+			title: row.title as string,
+			description: (row.description as string) || '',
+			category: (row.category as string) || '',
+			created_at: row.created_at as string,
+			hasPermission: permittedIds.has(row.id as number)
+		}));
 
-	const permittedIds = new Set(permittedContents.map((c) => c.id));
+		// 権限のあるコンテンツのみをフィルター
+		const permittedContents = allContents.filter((c) => c.hasPermission);
 
-	const allContents = allContentsResult.rows.map((row) => ({
-		id: row.id as number,
-		title: row.title as string,
-		description: (row.description as string) || '',
-		category: (row.category as string) || '',
-		created_at: row.created_at as string,
-		hasPermission: permittedIds.has(row.id as number)
-	}));
-
-	return {
-		user: locals.user,
-		contents: permittedContents,
-		allContents
-	};
+		return {
+			user: locals.user,
+			contents: permittedContents,
+			allContents
+		};
+	} catch (error) {
+		console.error('Error loading company contents:', error);
+		// エラーが発生しても空のデータを返す
+		return {
+			user: locals.user,
+			contents: [],
+			allContents: [],
+			error: 'コンテンツの読み込み中にエラーが発生しました'
+		};
+	}
 };
