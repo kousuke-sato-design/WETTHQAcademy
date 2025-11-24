@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業担当者向けマニュアル - WEBTHQAcademy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Yu Gothic', 'Meiryo', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border-left: 4px solid #f5576c;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            color: #f5576c;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #f5576c;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: #f5576c;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #f5576c;
+        }
+
+        h3 {
+            color: #f093fb;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #495057;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .feature-box {
+            background: #ffeef8;
+            border-left: 4px solid #f5576c;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-left: 4px solid #f5576c;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #f5576c;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e83e8c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f5576c;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        footer {
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            header {
+                background: #f5576c;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💼 企業担当者向けマニュアル</h1>
+            <p>WEBTHQAcademy - 企業担当者用操作ガイド</p>
+        </header>
+
+        <div class="content">
+            <!-- 目次 -->
+            <nav class="toc">
+                <h2>📑 目次</h2>
+                <ul>
+                    <li><a href="#overview">1. システム概要</a></li>
+                    <li><a href="#login">2. ログイン方法</a></li>
+                    <li><a href="#dashboard">3. ダッシュボード</a></li>
+                    <li><a href="#contents">4. コンテンツ管理</a></li>
+                    <li><a href="#students">5. 自社生徒管理</a></li>
+                    <li><a href="#staff">6. 自社スタッフ管理</a></li>
+                </ul>
+            </nav>
+
+            <!-- 1. システム概要 -->
+            <section id="overview">
+                <h2>1. システム概要</h2>
+                <p>WEBTHQAcademyは、企業向けストレスチェック知識補完プラットフォームです。企業担当者として、自社のデータ管理とコンテンツ編集が可能です。</p>
+
+                <div class="feature-box">
+                    <h3>企業担当者ができること</h3>
+                    <ul>
+                        <li>✅ 自社生徒の閲覧・管理</li>
+                        <li>✅ 自社スタッフの閲覧・管理</li>
+                        <li>✅ <strong>コンテンツの編集</strong>（管理者と同等の機能）</li>
+                        <li>✅ 閲覧権限のあるコンテンツの確認</li>
+                        <li>✅ R2動画のアップロード・管理</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 権限について</strong><br>
+                    企業担当者は、<strong>自社に関連するデータのみ</strong>を閲覧・編集できます。他社のデータにはアクセスできません。
+                </div>
+            </section>
+
+            <!-- 2. ログイン方法 -->
+            <section id="login">
+                <h2>2. ログイン方法</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>ログインページにアクセス</strong><br>
+                    URL: <code>/company/login</code>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>ログイン情報を入力</strong><br>
+                    管理者から発行されたログインIDとパスワードを入力してください。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>ログインボタンをクリック</strong><br>
+                    認証が成功すると、ダッシュボードに遷移します。
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ 初回ログイン時</strong><br>
+                    初回ログイン後は、パスワードを変更することをお勧めします。
+                </div>
+            </section>
+
+            <!-- 3. ダッシュボード -->
+            <section id="dashboard">
+                <h2>3. ダッシュボード</h2>
+                <p>ログイン後、最初に表示される画面です。自社の概要情報が表示されます。</p>
+
+                <h3>ダッシュボードの構成</h3>
+                <ul>
+                    <li><strong>ヘッダー</strong>: ロゴ、ユーザー名、ログアウトボタン</li>
+                    <li><strong>サイドバー</strong>: 各機能へのナビゲーション</li>
+                    <li><strong>メインコンテンツ</strong>: 自社の統計情報、お知らせなど</li>
+                </ul>
+            </section>
+
+            <!-- 4. コンテンツ管理 -->
+            <section id="contents">
+                <h2>4. コンテンツ管理</h2>
+                <p>閲覧権限のあるコンテンツを確認・編集できます。</p>
+
+                <h3>4.1 コンテンツ一覧</h3>
+                <p>URL: <code>/company/contents</code></p>
+                <p>自社に閲覧権限が付与されているコンテンツの一覧を表示します。</p>
+
+                <div class="feature-box">
+                    <strong>💡 ポイント</strong><br>
+                    閲覧権限は、マスター管理者が設定します。権限のないコンテンツは表示されません。
+                </div>
+
+                <h3>4.2 コンテンツ編集</h3>
+                <p>URL: <code>/company/contents/edit/[id]</code></p>
+                <p>企業担当者は、<strong>管理者と同等のコンテンツ編集機能</strong>を使用できます。</p>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>コンテンツ一覧から「編集」をクリック</strong><br>
+                    編集したいコンテンツを選択します。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>基本情報を編集</strong><br>
+                    <ul>
+                        <li>タイトル</li>
+                        <li>説明</li>
+                        <li>カテゴリ</li>
+                        <li>表示順序</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>セクションを追加・編集</strong><br>
+                    以下のタイプから選択できます：
+                    <ul>
+                        <li><strong>HTMLテキスト</strong>: リッチテキストエディタで作成</li>
+                        <li><strong>動画URL</strong>: YouTube/Vimeoの動画を埋め込み</li>
+                        <li><strong>R2動画</strong>: Cloudflare R2に動画をアップロード（最大100MB）</li>
+                        <li><strong>Google Drive添付</strong>: Google Driveのファイルをリンク</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>プレビューで確認</strong><br>
+                    右側のプレビューエリアで、実際の表示を確認できます。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <strong>保存</strong><br>
+                    「保存する」ボタンをクリックして完了です。
+                </div>
+
+                <h3>4.3 リッチテキストエディタの使い方</h3>
+                <p>HTMLテキストセクションでは、強力なリッチテキストエディタを使用できます。</p>
+
+                <h4>エディタの機能</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>機能</th>
+                            <th>説明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ビジュアル編集</td>
+                            <td>Wordのように直感的に編集</td>
+                        </tr>
+                        <tr>
+                            <td>HTMLコード編集</td>
+                            <td>HTMLを直接記述</td>
+                        </tr>
+                        <tr>
+                            <td>太字・斜体</td>
+                            <td>テキストの書式設定</td>
+                        </tr>
+                        <tr>
+                            <td>見出し（H2, H3）</td>
+                            <td>セクションの見出しを作成</td>
+                        </tr>
+                        <tr>
+                            <td>リスト</td>
+                            <td>箇条書き・番号付きリスト</td>
+                        </tr>
+                        <tr>
+                            <td>カラー</td>
+                            <td>テキストの色を変更（赤・青・緑）</td>
+                        </tr>
+                        <tr>
+                            <td>マーカー</td>
+                            <td>背景色でハイライト（黄・ピンク・緑）</td>
+                        </tr>
+                        <tr>
+                            <td>絵文字</td>
+                            <td>26種類の絵文字を挿入</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>エディタの使い方（詳細）</h4>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>「HTMLエディタを開く」ボタンをクリック</strong><br>
+                    モーダルウィンドウが開きます。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>タブを選択</strong><br>
+                    <ul>
+                        <li><strong>ビジュアル編集</strong>: 直感的に編集（初心者向け）</li>
+                        <li><strong>HTMLコード</strong>: HTMLを直接記述（上級者向け）</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>ツールバーで書式を適用</strong><br>
+                    テキストを選択して、ツールバーのボタンをクリックします。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>保存してエディタを閉じる</strong><br>
+                    「保存」ボタンをクリックすると、編集内容が反映されます。
+                </div>
+
+                <h3>4.4 R2動画アップロード</h3>
+                <p>Cloudflare R2を使用して、動画を直接アップロードできます。</p>
+
+                <div class="feature-box">
+                    <h4>動画アップロードの仕様</h4>
+                    <ul>
+                        <li><strong>対応形式</strong>: mp4, webm, ogg, mov</li>
+                        <li><strong>最大サイズ</strong>: 100MB（Cloudflare Workers制限）</li>
+                        <li><strong>アップロード方法</strong>:
+                            <ul>
+                                <li>既存動画を選択（R2バケット内）</li>
+                                <li>新規動画をアップロード</li>
+                            </ul>
+                        </li>
+                        <li><strong>プログレスバー</strong>: アップロード進行状況をリアルタイム表示</li>
+                    </ul>
+                </div>
+
+                <h4>動画アップロード手順</h4>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>R2動画セクションを追加</strong><br>
+                    「R2動画」ボタンをクリックして、セクションを追加します。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>動画を選択</strong><br>
+                    <ul>
+                        <li><strong>既存動画を使用する場合</strong>: 「既存動画を表示」→ ドロップダウンから選択</li>
+                        <li><strong>新しい動画をアップロードする場合</strong>: ファイル選択エリアをクリック</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>アップロード進行状況を確認</strong><br>
+                    プログレスバーが表示され、アップロードの進行状況が確認できます。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>アップロード完了</strong><br>
+                    完了すると、動画ファイル名が表示されます。
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 注意事項</strong><br>
+                    <ul>
+                        <li>100MBを超える動画は、YouTube/Vimeoにアップロードして、動画URLセクションを使用してください。</li>
+                        <li>アップロード中はブラウザを閉じないでください。</li>
+                        <li>ネットワーク環境によっては、時間がかかる場合があります。</li>
+                    </ul>
+                </div>
+
+                <h3>4.5 セクションの並び替え</h3>
+                <p>各セクションには「↑」「↓」ボタンがあり、順序を変更できます。</p>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>上に移動する場合</strong><br>
+                    「↑」ボタンをクリックします。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>下に移動する場合</strong><br>
+                    「↓」ボタンをクリックします。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>削除する場合</strong><br>
+                    「✕」ボタンをクリックします。
+                </div>
+            </section>
+
+            <!-- 5. 自社生徒管理 -->
+            <section id="students">
+                <h2>5. 自社生徒管理</h2>
+                <p>URL: <code>/company/users</code></p>
+
+                <h3>5.1 生徒一覧</h3>
+                <p>自社に所属する生徒の一覧を表示します。</p>
+
+                <h3>5.2 生徒情報の確認</h3>
+                <p>各生徒の以下の情報を確認できます：</p>
+                <ul>
+                    <li>ログインID</li>
+                    <li>名前</li>
+                    <li>登録日時</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ 生徒の追加・編集</strong><br>
+                    生徒の新規登録や情報の編集は、マスター管理者が行います。必要な場合は、管理者にご連絡ください。
+                </div>
+            </section>
+
+            <!-- 6. 自社スタッフ管理 -->
+            <section id="staff">
+                <h2>6. 自社スタッフ管理</h2>
+                <p>URL: <code>/company/staff</code></p>
+
+                <h3>6.1 スタッフ一覧</h3>
+                <p>自社に所属する企業担当者（スタッフ）の一覧を表示します。</p>
+
+                <h3>6.2 スタッフ情報の確認</h3>
+                <p>各スタッフの以下の情報を確認できます：</p>
+                <ul>
+                    <li>ログインID</li>
+                    <li>名前</li>
+                    <li>登録日時</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ スタッフの追加・編集</strong><br>
+                    スタッフの新規登録や情報の編集は、マスター管理者が行います。必要な場合は、管理者にご連絡ください。
+                </div>
+            </section>
+
+            <!-- ベストプラクティス -->
+            <section>
+                <h2>💡 ベストプラクティス</h2>
+
+                <h3>コンテンツ編集時のヒント</h3>
+                <ul>
+                    <li>✅ 編集前に、必ず<strong>プレビュー</strong>で表示を確認しましょう</li>
+                    <li>✅ 長い文章は、<strong>セクションを分けて</strong>読みやすくしましょう</li>
+                    <li>✅ <strong>見出し（H2, H3）</strong>を適切に使って、構造化しましょう</li>
+                    <li>✅ 重要な箇所は、<strong>マーカー</strong>や<strong>カラー</strong>で強調しましょう</li>
+                    <li>✅ 絵文字を使って、<strong>視覚的に分かりやすく</strong>しましょう</li>
+                    <li>✅ 動画は、<strong>適切なサイズ</strong>でアップロードしましょう（100MB以下）</li>
+                </ul>
+
+                <h3>セキュリティのヒント</h3>
+                <ul>
+                    <li>✅ パスワードは<strong>定期的に変更</strong>しましょう</li>
+                    <li>✅ 共用PCでは、必ず<strong>ログアウト</strong>しましょう</li>
+                    <li>✅ ログイン情報は<strong>他者と共有しない</strong>でください</li>
+                </ul>
+            </section>
+
+            <div class="success-box">
+                <h3>📞 サポート</h3>
+                <p>ご不明な点がございましたら、マスター管理者までお問い合わせください。</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 WEBTHQAcademy. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

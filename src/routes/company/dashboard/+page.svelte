@@ -133,6 +133,26 @@
 			</a>
 		</div>
 
+		<!-- マニュアル -->
+		<div class="mb-8">
+			<h2 class="text-2xl font-bold text-gray-900 mb-4">📚 操作マニュアル</h2>
+			<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+				<p class="text-gray-600 mb-4">
+					システムの使い方を詳しく説明したマニュアルです。初めての方はぜひご確認ください。
+				</p>
+				<a
+					href="/docs/company-manual.html"
+					target="_blank"
+					class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-pink-700 transition-colors shadow-sm"
+				>
+					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+					</svg>
+					企業担当者向けマニュアルを開く
+				</a>
+			</div>
+		</div>
+
 		<!-- お知らせ -->
 		<div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-sm p-6 text-white">
 			<h3 class="text-xl font-semibold mb-2">企業担当者向け機能</h3>
