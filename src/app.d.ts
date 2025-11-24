@@ -1,6 +1,6 @@
 import type { User } from '$lib/auth/auth';
 import type { D1Wrapper } from '$lib/db/d1';
-import type { D1Database } from '@cloudflare/workers-types';
+import type { D1Database, R2Bucket } from '@cloudflare/workers-types';
 
 declare global {
 	namespace App {
@@ -11,6 +11,7 @@ declare global {
 		interface Platform {
 			env: {
 				DB: D1Database;
+				VIDEOS: R2Bucket;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

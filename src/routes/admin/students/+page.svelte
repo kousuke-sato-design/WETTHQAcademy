@@ -8,12 +8,16 @@
 
 	let showCreateModal = false;
 	let showDeleteModal = false;
+	let showEditModal = false;
 	let selectedStudent: any = null;
 
 	// フォーム入力
 	let selectedCompanyId = '';
 	let employeeNumber = '';
 	let studentName = '';
+
+	// 編集フォーム入力
+	let editPassword = '';
 
 	// フィルター
 	let selectedFilterCompanyId = '';
@@ -22,9 +26,11 @@
 	$: if (form?.success) {
 		showCreateModal = false;
 		showDeleteModal = false;
+		showEditModal = false;
 		selectedCompanyId = '';
 		employeeNumber = '';
 		studentName = '';
+		editPassword = '';
 	}
 
 	function getIconSVG(iconName: string) {
@@ -34,13 +40,20 @@
 			x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
 			trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
 			filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
-			student: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>'
+			student: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+			edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
 		};
 		return icons[iconName] || '';
 	}
 
 	function openCreateModal() {
 		showCreateModal = true;
+	}
+
+	function openEditModal(student: any) {
+		selectedStudent = student;
+		editPassword = '';  // パスワードは空にする
+		showEditModal = true;
 	}
 
 	function openDeleteModal(student: any) {
@@ -51,7 +64,9 @@
 	function closeModals() {
 		showCreateModal = false;
 		showDeleteModal = false;
+		showEditModal = false;
 		selectedStudent = null;
+		editPassword = '';
 	}
 
 	// フィルタリングされた生徒
@@ -193,15 +208,28 @@
 									</div>
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm">
-									<button
-										on:click={() => openDeleteModal(student)}
-										class="inline-flex items-center text-red-600 hover:text-red-700 font-medium"
-									>
-										<div class="w-4 h-4 mr-1">
-											{@html getIconSVG('trash')}
-										</div>
-										削除
-									</button>
+									<div class="flex items-center space-x-3">
+										{#if student.use_unified_id === 1}
+											<button
+												on:click={() => openEditModal(student)}
+												class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+											>
+												<div class="w-4 h-4 mr-1">
+													{@html getIconSVG('edit')}
+												</div>
+												編集
+											</button>
+										{/if}
+										<button
+											on:click={() => openDeleteModal(student)}
+											class="inline-flex items-center text-red-600 hover:text-red-700 font-medium"
+										>
+											<div class="w-4 h-4 mr-1">
+												{@html getIconSVG('trash')}
+											</div>
+											削除
+										</button>
+									</div>
 								</td>
 							</tr>
 						{/each}
@@ -297,6 +325,84 @@
 						class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm"
 					>
 						登録する
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- 編集モーダル（統一ID用） -->
+{#if showEditModal && selectedStudent}
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			<div class="flex items-center justify-between p-6 border-b border-gray-200">
+				<h2 class="text-2xl font-bold text-gray-900">統一ID生徒の編集</h2>
+				<button
+					on:click={closeModals}
+					class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+				>
+					<div class="w-5 h-5 text-gray-500">
+						{@html getIconSVG('x')}
+					</div>
+				</button>
+			</div>
+
+			<form method="POST" action="?/updateStudent" use:enhance class="p-6 space-y-6">
+				<input type="hidden" name="id" value={selectedStudent.id} />
+
+				<div class="space-y-4">
+					<!-- 生徒情報（表示のみ） -->
+					<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+						<div class="flex items-center space-x-2 mb-2">
+							<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+								統一ID
+							</span>
+						</div>
+						<p class="text-sm text-gray-700 mb-1">
+							<span class="font-medium">名前:</span> {selectedStudent.name}
+						</p>
+						<p class="text-sm text-gray-700 mb-1">
+							<span class="font-medium">ユーザーID:</span> {selectedStudent.login_id}
+						</p>
+						<p class="text-sm text-gray-700">
+							<span class="font-medium">所属企業:</span> {selectedStudent.company_name || '-'}
+						</p>
+					</div>
+
+					<!-- パスワード変更 -->
+					<div>
+						<label for="edit_password" class="block text-sm font-medium text-gray-700 mb-2">
+							新しいパスワード <span class="text-red-500">*</span>
+						</label>
+						<input
+							type="password"
+							id="edit_password"
+							name="password"
+							bind:value={editPassword}
+							required
+							placeholder="新しいパスワードを入力"
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+						/>
+						<p class="mt-1 text-sm text-gray-500">
+							統一ID「{selectedStudent.login_id}」のパスワードを変更します
+						</p>
+					</div>
+				</div>
+
+				<div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+					<button
+						type="button"
+						on:click={closeModals}
+						class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+					>
+						キャンセル
+					</button>
+					<button
+						type="submit"
+						class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+					>
+						更新する
 					</button>
 				</div>
 			</form>

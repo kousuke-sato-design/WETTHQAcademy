@@ -123,7 +123,7 @@ export function deserializeUser(data: string): User | null {
 				id: parsed.userId,
 				login_id: '', // 簡易形式では不明
 				role: parsed.role,
-				company_id: parsed.company_id || null,
+				company_id: parsed.company_id ?? null,
 				name: '' // 簡易形式では不明
 			};
 		}

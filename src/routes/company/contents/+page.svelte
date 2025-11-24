@@ -55,10 +55,7 @@
 		{:else}
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{#each data.contents as content}
-					<a
-						href="/user/contents/{content.id}"
-						class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow group"
-					>
+					<div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow group relative">
 						<div class="p-6">
 							<!-- カテゴリー -->
 							{#if content.category}
@@ -97,7 +94,25 @@
 								</div>
 							</div>
 						</div>
-					</a>
+
+						<!-- Action buttons -->
+						<div class="px-6 pb-6 flex gap-2">
+							<a
+								href="/user/contents/{content.id}"
+								class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-center font-medium rounded-lg transition-colors"
+							>
+								閲覧する
+							</a>
+							{#if content.can_edit}
+								<a
+									href="/company/contents/edit/{content.id}"
+									class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-center font-medium rounded-lg transition-colors"
+								>
+									編集する
+								</a>
+							{/if}
+						</div>
+					</div>
 				{/each}
 			</div>
 		{/if}

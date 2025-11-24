@@ -16,14 +16,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	let contentsResult;
 	if (companyId && !isCompanyAdmin) {
 		// 生徒の場合は許可されたコンテンツのみ
+		// 企業ごとの表示順序（display_order）を優先
 		contentsResult = await db.execute({
 			sql: `
-				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order
+				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order, ccp.display_order
 				FROM contents c
 				INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
 				WHERE c.show_in_sidebar = 1
 				AND ccp.company_id = ?
-				ORDER BY c.sidebar_order ASC, c.created_at ASC
+				ORDER BY ccp.display_order ASC, c.sidebar_order ASC, c.created_at ASC
 			`,
 			args: [companyId]
 		});

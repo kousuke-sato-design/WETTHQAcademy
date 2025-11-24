@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Layout from '$lib/components/layout/Layout.svelte';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 
 	export let data: PageData;
@@ -50,6 +51,11 @@
 		{#if form?.error}
 			<div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
 				<p class="text-red-800 font-medium">{form.error}</p>
+			</div>
+		{/if}
+		{#if form?.success}
+			<div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+				<p class="text-green-800 font-medium">{form.message || '更新しました'}</p>
 			</div>
 		{/if}
 
@@ -311,7 +317,14 @@
 				この企業の生徒が閲覧できるコンテンツを選択してください
 			</p>
 
-			<form method="POST" action="?/updatePermissions" use:enhance>
+			<form method="POST" action="?/updatePermissions" use:enhance={() => {
+			return async ({ result, update }) => {
+				if (result.type === 'success') {
+					await invalidateAll();
+				}
+				await update({ reset: false });
+			};
+		}}>
 				{#if !data.contents || data.contents.length === 0}
 					<div class="text-center py-12 bg-gray-50 rounded-lg">
 						<p class="text-gray-500">コンテンツが登録されていません</p>
@@ -319,33 +332,60 @@
 				{:else}
 					<div class="space-y-3 mb-6">
 						{#each data.contents as content}
-							<label class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-								<input
-									type="checkbox"
-									name="content_ids[]"
-									value={content.id}
-									checked={content.permitted}
-									class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-								/>
-								<div class="ml-3 flex-1">
-									<div class="flex items-center justify-between">
-										<h3 class="font-medium text-gray-900">{content.title}</h3>
-										{#if content.permitted}
-											<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
-												許可済み
-											</span>
+							<div class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+								<label class="flex items-start flex-1 cursor-pointer">
+									<input
+										type="checkbox"
+										name="content_ids[]"
+										value={content.id}
+										checked={content.permitted}
+										class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+									/>
+									<div class="ml-3 flex-1">
+										<div class="flex items-center justify-between">
+											<h3 class="font-medium text-gray-900">{content.title}</h3>
+											{#if content.permitted}
+												<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+													許可済み
+												</span>
+											{/if}
+										</div>
+										{#if content.category}
+											<p class="text-sm text-gray-600 mt-1">
+												カテゴリ: {content.category}
+											</p>
 										{/if}
-									</div>
-									{#if content.category}
-										<p class="text-sm text-gray-600 mt-1">
-											カテゴリ: {content.category}
+										<p class="text-xs text-gray-500 mt-1">
+											作成日: {new Date(content.created_at).toLocaleDateString('ja-JP')}
 										</p>
-									{/if}
-									<p class="text-xs text-gray-500 mt-1">
-										作成日: {new Date(content.created_at).toLocaleDateString('ja-JP')}
-									</p>
+									</div>
+								</label>
+								<div class="ml-4 flex items-center space-x-4">
+									<div class="flex items-center space-x-2">
+										<label for="display_order_{content.id}" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+											表示順序:
+										</label>
+										<input
+											type="number"
+											id="display_order_{content.id}"
+											name="display_order_{content.id}"
+											value={content.display_order || 0}
+											min="0"
+											class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											placeholder="0"
+										/>
+									</div>
+									<label class="flex items-center space-x-2 cursor-pointer">
+										<input
+											type="checkbox"
+											name="can_edit_{content.id}"
+											checked={content.can_edit}
+											class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+										/>
+										<span class="text-sm font-medium text-gray-700 whitespace-nowrap">担当者編集可能</span>
+									</label>
 								</div>
-							</label>
+							</div>
 						{/each}
 					</div>
 

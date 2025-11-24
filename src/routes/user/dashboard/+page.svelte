@@ -110,8 +110,7 @@
 							システムの使い方が分からない方は、マニュアルをご確認ください。ログイン方法、コンテンツの閲覧方法などを詳しく説明しています。
 						</p>
 						<a
-							href="/docs/user-manual.html"
-							target="_blank"
+							href="/user/manual"
 							class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
 						>
 							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

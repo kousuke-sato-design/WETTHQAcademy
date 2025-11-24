@@ -72,10 +72,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		args: []
 	});
 
-	// この企業が閲覧許可を持っているコンテンツIDを取得
+	// この企業が閲覧許可を持っているコンテンツIDと表示順序、編集権限を取得
 	const permissionsResult = await db.execute({
 		sql: `
-			SELECT content_id
+			SELECT content_id, display_order, can_edit
 			FROM company_content_permissions
 			WHERE company_id = ?
 		`,
@@ -83,13 +83,21 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	});
 
 	const permittedContentIds = new Set(permissionsResult.rows.map(row => row.content_id as number));
+	const contentDisplayOrders = new Map(
+		permissionsResult.rows.map(row => [row.content_id as number, row.display_order as number])
+	);
+	const contentEditPermissions = new Map(
+		permissionsResult.rows.map(row => [row.content_id as number, (row.can_edit as number) === 1])
+	);
 
 	const contents = contentsResult.rows.map((row) => ({
 		id: row.id as number,
 		title: row.title as string,
 		category: row.category as string | null,
 		created_at: row.created_at as string,
-		permitted: permittedContentIds.has(row.id as number)
+		permitted: permittedContentIds.has(row.id as number),
+		display_order: contentDisplayOrders.get(row.id as number) || 0,
+		can_edit: contentEditPermissions.get(row.id as number) || false
 	}));
 
 	return {
@@ -151,15 +159,23 @@ export const actions = {
 
 			// チェックされたコンテンツの許可を追加
 			const contentIds = data.getAll('content_ids[]');
+			console.log(`[受講許可更新] 企業ID: ${companyId}, コンテンツ数: ${contentIds.length}`);
+
 			for (const contentId of contentIds) {
+				// 表示順序を取得（未指定の場合は0）
+				const displayOrder = data.get(`display_order_${contentId}`)?.toString() || '0';
+				// 編集権限を取得（チェックされている場合は1、それ以外は0）
+				const canEdit = data.get(`can_edit_${contentId}`) ? 1 : 0;
+
 				await db.execute({
-					sql: 'INSERT INTO company_content_permissions (company_id, content_id) VALUES (?, ?)',
-					args: [parseInt(companyId), parseInt(contentId.toString())]
+					sql: 'INSERT INTO company_content_permissions (company_id, content_id, display_order, can_edit) VALUES (?, ?, ?, ?)',
+					args: [parseInt(companyId), parseInt(contentId.toString()), parseInt(displayOrder), canEdit]
 				});
 			}
 
-			return { success: true, message: 'コンテンツの受講許可を更新しました' };
-		} catch (error) {
+			console.log(`[受講許可更新完了] ${contentIds.length}件のコンテンツ許可を設定しました`);
+			return { success: true, message: '受講許可の更新が完了しました' };
+		} catch (error: any) {
 			console.error('Permission update error:', error);
 			return fail(500, { error: 'データベースエラーが発生しました' });
 		}

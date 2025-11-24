@@ -121,5 +121,59 @@ export const actions = {
 			console.error('Student delete error:', error);
 			return fail(500, { error: 'データベースエラーが発生しました' });
 		}
+	},
+
+	updateStudent: async ({ request, locals }) => {
+		const db = locals.db;
+		if (!db) {
+			return fail(500, { error: 'データベース接続エラー' });
+		}
+
+		const data = await request.formData();
+		const id = data.get('id')?.toString();
+		const password = data.get('password')?.toString();
+
+		// バリデーション
+		if (!id) {
+			return fail(400, { error: '生徒IDが指定されていません' });
+		}
+
+		if (!password) {
+			return fail(400, { error: 'パスワードを入力してください' });
+		}
+
+		if (password.length < 4) {
+			return fail(400, { error: 'パスワードは4文字以上で入力してください' });
+		}
+
+		try {
+			// 生徒が存在するか確認（統一IDのみ更新可能）
+			const studentResult = await db.execute({
+				sql: 'SELECT id, use_unified_id FROM students WHERE id = ?',
+				args: [parseInt(id)]
+			});
+
+			if (studentResult.rows.length === 0) {
+				return fail(404, { error: '生徒が見つかりません' });
+			}
+
+			const student = studentResult.rows[0];
+			if (student.use_unified_id !== 1) {
+				return fail(400, { error: '統一ID以外の生徒は編集できません' });
+			}
+
+			// パスワードをハッシュ化して更新
+			const passwordHash = await bcrypt.hash(password, 10);
+			await db.execute({
+				sql: 'UPDATE students SET password_hash = ? WHERE id = ?',
+				args: [passwordHash, parseInt(id)]
+			});
+
+			console.log(`[統一ID生徒更新] ID: ${id} のパスワードを更新しました`);
+			return { success: true, message: 'パスワードを更新しました' };
+		} catch (error) {
+			console.error('Student update error:', error);
+			return fail(500, { error: 'データベースエラーが発生しました' });
+		}
 	}
 } satisfies Actions;

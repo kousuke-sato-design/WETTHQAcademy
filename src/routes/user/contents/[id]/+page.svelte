@@ -9,6 +9,7 @@
 			introduction: 'border-blue-500',
 			text: 'border-gray-500',
 			video: 'border-purple-500',
+			r2_video: 'border-orange-500',
 			image: 'border-pink-500',
 			attachment: 'border-green-500'
 		};
@@ -82,7 +83,9 @@
 									{#if item.type === 'heading'}
 										<h3 class="text-xl font-semibold text-gray-800 mt-6">{item.content}</h3>
 									{:else if item.type === 'text'}
-										<p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{item.content}</p>
+										<div class="prose max-w-none">
+											{@html item.content}
+										</div>
 									{:else if item.type === 'video' && item.content}
 										<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-md">
 											<iframe
@@ -92,6 +95,18 @@
 												allowfullscreen
 												title="Video content"
 											></iframe>
+										</div>
+									{:else if item.type === 'r2_video' && item.content}
+										<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-md">
+											<video
+												controls
+												class="w-full h-full"
+												preload="none"
+												playsinline
+											>
+												<source src="/api/video/{item.content}" type="video/mp4" />
+												お使いのブラウザは動画再生をサポートしていません。
+											</video>
 										</div>
 									{:else if item.type === 'image' && item.content}
 										<img

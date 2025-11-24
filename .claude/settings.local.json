@@ -51,7 +51,11 @@
       "WebFetch(domain:www.youtube.com)",
       "WebFetch(domain:docs.google.com)",
       "Bash(del sample-content.sql)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(wrangler pages deploy:*)",
+      "Bash(del:*)",
+      "Bash(cat:*)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

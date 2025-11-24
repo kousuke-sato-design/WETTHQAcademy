@@ -1,7 +1,16 @@
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { getDb } from '$lib/db';
 import { verifyCredentials } from '$lib/auth/auth';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	// すでに管理者としてログインしている場合はダッシュボードへリダイレクト
+	if (locals.user?.role === 'master') {
+		throw redirect(303, '/admin/dashboard');
+	}
+
+	return {};
+};
 
 export const actions = {
 	login: async ({ request, cookies, locals }) => {

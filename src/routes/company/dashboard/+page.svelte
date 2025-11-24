@@ -141,8 +141,7 @@
 					システムの使い方を詳しく説明したマニュアルです。初めての方はぜひご確認ください。
 				</p>
 				<a
-					href="/docs/company-manual.html"
-					target="_blank"
+					href="/company/manual"
 					class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-pink-700 transition-colors shadow-sm"
 				>
 					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

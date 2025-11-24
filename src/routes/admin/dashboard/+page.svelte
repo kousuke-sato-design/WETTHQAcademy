@@ -116,8 +116,7 @@
 				</p>
 				<div class="flex flex-wrap gap-3">
 					<a
-						href="/docs/admin-manual.html"
-						target="_blank"
+						href="/admin/manual"
 						class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors shadow-sm"
 					>
 						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,8 +125,7 @@
 						管理者向けマニュアル
 					</a>
 					<a
-						href="/docs/company-manual.html"
-						target="_blank"
+						href="/company/manual"
 						class="inline-flex items-center px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transition-colors"
 					>
 						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,8 +134,7 @@
 						企業担当者向けマニュアル
 					</a>
 					<a
-						href="/docs/user-manual.html"
-						target="_blank"
+						href="/user/manual"
 						class="inline-flex items-center px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transition-colors"
 					>
 						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

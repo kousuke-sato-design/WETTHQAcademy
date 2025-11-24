@@ -15,12 +15,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		};
 	}
 
-	// この企業が閲覧許可を持っているコンテンツのみを取得
+	// この企業が閲覧許可を持っているコンテンツのみを取得（編集権限も含む）
 	let contentsResult;
 	try {
 		contentsResult = await db.execute({
 			sql: `
-				SELECT c.id, c.title, c.description, c.category, c.created_at, c.content_type
+				SELECT c.id, c.title, c.description, c.category, c.created_at, c.content_type, ccp.can_edit
 				FROM contents c
 				INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
 				WHERE ccp.company_id = ?
@@ -43,6 +43,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		category: (row.category as string) || '',
 		created_at: row.created_at as string,
 		content_type: row.content_type as string,
+		can_edit: (row.can_edit as number) === 1,
 		viewCount: 0 // TODO: 後で閲覧履歴テーブルを作成して実装
 	}));
 

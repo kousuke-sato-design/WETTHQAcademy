@@ -4,7 +4,7 @@
   "description": "ストレスチェック知識補完プラットフォーム",
   "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev --compatibility-date=2024-01-01 --d1 DB=webthqacademy-db -- npm run dev:sveltekit",
+    "dev": "wrangler pages dev --d1 DB=webthqacademy-db -- npm run dev:sveltekit",
     "dev:sveltekit": "vite dev",
     "build": "vite build",
     "preview": "wrangler pages dev .svelte-kit/cloudflare",

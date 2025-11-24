@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒向けマニュアル - WEBTHQAcademy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Yu Gothic', 'Meiryo', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border-left: 4px solid #4facfe;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #4facfe;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: #4facfe;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4facfe;
+        }
+
+        h3 {
+            color: #00f2fe;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #495057;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .feature-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4facfe;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #4facfe;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e83e8c;
+        }
+
+        .screenshot {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        footer {
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            header {
+                background: #4facfe;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📖 生徒向けマニュアル</h1>
+            <p>WEBTHQAcademy - 学習プラットフォーム使い方ガイド</p>
+        </header>
+
+        <div class="content">
+            <!-- 目次 -->
+            <nav class="toc">
+                <h2>📑 目次</h2>
+                <ul>
+                    <li><a href="#welcome">1. ようこそ！</a></li>
+                    <li><a href="#login">2. ログイン方法</a></li>
+                    <li><a href="#dashboard">3. ダッシュボード</a></li>
+                    <li><a href="#contents">4. コンテンツ閲覧</a></li>
+                    <li><a href="#tips">5. 学習のヒント</a></li>
+                    <li><a href="#trouble">6. トラブルシューティング</a></li>
+                </ul>
+            </nav>
+
+            <!-- 1. ようこそ -->
+            <section id="welcome">
+                <h2>1. ようこそ！</h2>
+                <p>WEBTHQAcademyへようこそ！このプラットフォームでは、ストレスチェックに関する知識を学習できます。</p>
+
+                <div class="success-box">
+                    <h3>🎓 このプラットフォームでできること</h3>
+                    <ul>
+                        <li>✅ 動画やテキストで学習</li>
+                        <li>✅ いつでも、どこでも、自分のペースで学習</li>
+                        <li>✅ スマートフォン・タブレット・PCから利用可能</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h4>📱 推奨環境</h4>
+                    <ul>
+                        <li><strong>ブラウザ</strong>: Google Chrome、Microsoft Edge、Safari（最新版）</li>
+                        <li><strong>インターネット接続</strong>: 動画閲覧には安定したインターネット接続が必要です</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 2. ログイン方法 -->
+            <section id="login">
+                <h2>2. ログイン方法</h2>
+                <p>学習を始めるには、まずログインが必要です。</p>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>ログインページにアクセス</strong><br>
+                    担当者から送られてきたURLをクリックするか、以下のURLにアクセスしてください。<br>
+                    URL: <code>/user/login</code>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>ログイン情報を入力</strong><br>
+                    担当者から発行された以下の情報を入力してください：
+                    <ul>
+                        <li>ログインID</li>
+                        <li>パスワード</li>
+                    </ul>
+                </div>
+
+                <div class="screenshot">
+                    [ログイン画面のイメージ]<br>
+                    ログインIDとパスワードの入力欄があります
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>「ログイン」ボタンをクリック</strong><br>
+                    正しい情報を入力すると、ダッシュボードに移動します。
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ ログインできない場合</strong><br>
+                    <ul>
+                        <li>ログインIDとパスワードが正しいか確認してください</li>
+                        <li>大文字・小文字を間違えていないか確認してください</li>
+                        <li>それでもログインできない場合は、担当者にお問い合わせください</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 統一IDについて</strong><br>
+                    企業によっては、統一ID（<code>user</code>）でログインする場合があります。詳しくは担当者にご確認ください。
+                </div>
+            </section>
+
+            <!-- 3. ダッシュボード -->
+            <section id="dashboard">
+                <h2>3. ダッシュボード</h2>
+                <p>ログインすると、最初に表示されるのがダッシュボードです。</p>
+
+                <h3>3.1 画面の構成</h3>
+
+                <div class="feature-box">
+                    <h4>画面の見方</h4>
+                    <ul>
+                        <li><strong>ヘッダー（上部）</strong>
+                            <ul>
+                                <li>ロゴ: クリックするとダッシュボードに戻ります</li>
+                                <li>ユーザー名: ログインしているユーザー名が表示されます</li>
+                                <li>ログアウトボタン: 学習を終える時にクリックします</li>
+                            </ul>
+                        </li>
+                        <li><strong>サイドバー（左側）</strong>
+                            <ul>
+                                <li>学習コンテンツの一覧が表示されます</li>
+                                <li>クリックすると、そのコンテンツに移動します</li>
+                            </ul>
+                        </li>
+                        <li><strong>メインエリア（中央）</strong>
+                            <ul>
+                                <li>選択したコンテンツが表示されます</li>
+                                <li>お知らせや学習の進捗が表示される場合もあります</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>3.2 ログアウト方法</h3>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>画面右上の「ログアウト」をクリック</strong><br>
+                    学習を終える時は、必ずログアウトしてください。
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 共用PCをお使いの場合</strong><br>
+                    他の人に情報を見られないよう、必ずログアウトしてください。
+                </div>
+            </section>
+
+            <!-- 4. コンテンツ閲覧 -->
+            <section id="contents">
+                <h2>4. コンテンツ閲覧</h2>
+                <p>学習コンテンツを閲覧する方法を説明します。</p>
+
+                <h3>4.1 コンテンツの選び方</h3>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>サイドバーからコンテンツを選択</strong><br>
+                    左側のサイドバーに、学習できるコンテンツの一覧が表示されています。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>コンテンツをクリック</strong><br>
+                    学習したいコンテンツをクリックすると、そのページに移動します。
+                </div>
+
+                <div class="screenshot">
+                    [サイドバーのイメージ]<br>
+                    コンテンツ一覧が表示されています
+                </div>
+
+                <h3>4.2 コンテンツの種類</h3>
+
+                <div class="feature-box">
+                    <h4>コンテンツには以下の種類があります</h4>
+
+                    <h4>📝 テキストコンテンツ</h4>
+                    <ul>
+                        <li>読んで学習するコンテンツです</li>
+                        <li>重要な箇所は、色やマーカーでハイライトされています</li>
+                        <li>スクロールして、最後まで読みましょう</li>
+                    </ul>
+
+                    <h4>🎬 動画コンテンツ</h4>
+                    <ul>
+                        <li>動画を見て学習するコンテンツです</li>
+                        <li>再生ボタン（▶）をクリックすると、動画が再生されます</li>
+                        <li>一時停止、巻き戻し、早送りもできます</li>
+                        <li>全画面表示も可能です</li>
+                    </ul>
+
+                    <h4>📎 添付ファイル</h4>
+                    <ul>
+                        <li>PDFやドキュメントなどの資料です</li>
+                        <li>「添付ファイルを開く」をクリックすると、別タブで開きます</li>
+                        <li>ダウンロードして保存することもできます</li>
+                    </ul>
+                </div>
+
+                <h3>4.3 動画の見方</h3>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>再生ボタン（▶）をクリック</strong><br>
+                    動画が再生されます。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>音量を調整</strong><br>
+                    動画プレーヤーの音量アイコンで調整できます。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>一時停止したい時</strong><br>
+                    再生中の動画をクリックすると、一時停止します。
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>全画面表示</strong><br>
+                    動画プレーヤーの全画面ボタンをクリックすると、大きな画面で見られます。<br>
+                    （ESCキーで元に戻ります）
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 ヒント</strong><br>
+                    <ul>
+                        <li>動画は何度でも見返すことができます</li>
+                        <li>分からなかった部分は、巻き戻して再度確認しましょう</li>
+                        <li>字幕がある動画もあります（字幕ボタンで表示/非表示）</li>
+                    </ul>
+                </div>
+
+                <h3>4.4 スマートフォン・タブレットでの利用</h3>
+
+                <div class="success-box">
+                    <h4>📱 モバイル端末でも快適に学習できます</h4>
+                    <ul>
+                        <li>✅ レスポンシブデザインで、画面サイズに自動調整</li>
+                        <li>✅ 通勤・通学中にも学習可能</li>
+                        <li>✅ 動画も問題なく再生できます</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ データ通信量にご注意</strong><br>
+                    動画を見る場合、データ通信量が多くなります。Wi-Fi環境での視聴をお勧めします。
+                </div>
+            </section>
+
+            <!-- 5. 学習のヒント -->
+            <section id="tips">
+                <h2>5. 学習のヒント</h2>
+
+                <div class="success-box">
+                    <h3>🎯 効果的な学習方法</h3>
+
+                    <h4>1️⃣ 計画的に学習する</h4>
+                    <ul>
+                        <li>毎日少しずつ学習する習慣をつけましょう</li>
+                        <li>1日15〜30分でも、継続することが大切です</li>
+                    </ul>
+
+                    <h4>2️⃣ メモを取る</h4>
+                    <ul>
+                        <li>重要なポイントはメモを取りましょう</li>
+                        <li>後で見返すことができます</li>
+                    </ul>
+
+                    <h4>3️⃣ 復習する</h4>
+                    <ul>
+                        <li>一度学習したコンテンツも、何度か見返しましょう</li>
+                        <li>反復学習で、知識が定着します</li>
+                    </ul>
+
+                    <h4>4️⃣ 分からないことは質問する</h4>
+                    <ul>
+                        <li>疑問点は、担当者に質問しましょう</li>
+                        <li>理解するまで学習することが大切です</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3>⏰ 学習時間の目安</h3>
+                    <ul>
+                        <li><strong>テキストコンテンツ</strong>: 10〜20分程度</li>
+                        <li><strong>動画コンテンツ</strong>: 5〜15分程度</li>
+                        <li><strong>全コンテンツ</strong>: 企業や設定によって異なります</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 6. トラブルシューティング -->
+            <section id="trouble">
+                <h2>6. トラブルシューティング</h2>
+
+                <h3>よくある質問</h3>
+
+                <h4>Q1. ログインできません</h4>
+                <div class="info-box">
+                    <strong>A.</strong> 以下を確認してください：
+                    <ul>
+                        <li>ログインIDとパスワードが正しいか</li>
+                        <li>大文字・小文字を間違えていないか</li>
+                        <li>ブラウザのCookieが有効になっているか</li>
+                    </ul>
+                    それでも解決しない場合は、担当者にご連絡ください。
+                </div>
+
+                <h4>Q2. 動画が再生されません</h4>
+                <div class="info-box">
+                    <strong>A.</strong> 以下を試してください：
+                    <ul>
+                        <li>ページを更新（F5キーまたは更新ボタン）</li>
+                        <li>ブラウザを最新バージョンに更新</li>
+                        <li>別のブラウザで試す（Chrome、Edge、Safariなど）</li>
+                        <li>インターネット接続を確認</li>
+                    </ul>
+                </div>
+
+                <h4>Q3. コンテンツが表示されません</h4>
+                <div class="info-box">
+                    <strong>A.</strong> 閲覧権限がない可能性があります。担当者にご確認ください。
+                </div>
+
+                <h4>Q4. パスワードを忘れました</h4>
+                <div class="info-box">
+                    <strong>A.</strong> 担当者に連絡して、パスワードの再発行を依頼してください。
+                </div>
+
+                <h4>Q5. スマートフォンで見づらいです</h4>
+                <div class="info-box">
+                    <strong>A.</strong> スマートフォンを横向きにすると、より見やすくなります。また、ピンチ操作で拡大・縮小もできます。
+                </div>
+
+                <div class="warning-box">
+                    <h3>📞 お問い合わせ</h3>
+                    <p>上記で解決しない場合や、その他のご質問は、企業担当者またはシステム管理者までお問い合わせください。</p>
+                </div>
+            </section>
+
+            <div class="success-box">
+                <h3>🎓 学習を楽しんでください！</h3>
+                <p>WEBTHQAcademyでの学習が、皆様のスキルアップに役立つことを願っています。</p>
+                <p>分からないことがあれば、いつでも質問してください。一緒に学んでいきましょう！</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 WEBTHQAcademy. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
