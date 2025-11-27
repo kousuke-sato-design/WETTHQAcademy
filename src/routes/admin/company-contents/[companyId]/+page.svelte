@@ -6,7 +6,6 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	let showCreateModal = false;
 	let showDeleteModal = false;
 	let selectedContent: any = null;
 
@@ -14,13 +13,10 @@
 	let sortBy: 'number' | 'title' | 'category' | 'type' | 'created_at' = 'number';
 	let sortOrder: 'asc' | 'desc' = 'asc';
 
-	// フォーム入力
-	let title = '';
-	let description = '';
-	let contentType = 'video';
-	let contentUrl = '';
-	let category = '';
-	let order = '0';
+	// 成功時にモーダルを閉じる
+	$: if (form?.success) {
+		showDeleteModal = false;
+	}
 
 	// 作成日順に番号を付与したコンテンツ
 	$: numberedContents = [...data.contents]
@@ -62,25 +58,14 @@
 		}
 	}
 
-	// 成功時にモーダルを閉じる
-	$: if (form?.success) {
-		showCreateModal = false;
-		showDeleteModal = false;
-		title = '';
-		description = '';
-		contentType = 'video';
-		contentUrl = '';
-		category = '';
-		order = '0';
-	}
-
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
 			document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
 			video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
 			plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
 			x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-			trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>'
+			trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+			back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'
 		};
 		return icons[iconName] || '';
 	}
@@ -93,37 +78,47 @@
 		return new Date(dateString).toLocaleDateString('ja-JP');
 	}
 
-	function openCreateModal() {
-		showCreateModal = true;
-	}
-
 	function openDeleteModal(content: any) {
 		selectedContent = content;
 		showDeleteModal = true;
 	}
 
 	function closeModals() {
-		showCreateModal = false;
 		showDeleteModal = false;
 		selectedContent = null;
 	}
 </script>
 
 <svelte:head>
-	<title>コンテンツ管理 - WEBTHQAcademy</title>
+	<title>{data.company.company_name} - 企業専用コンテンツ - WEBTHQAcademy</title>
 </svelte:head>
 
 <Layout user={data.user}>
 	<div class="max-w-6xl">
+		<!-- パンくずナビ -->
+		<div class="mb-4">
+			<a href="/admin/company-contents" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+				<div class="w-4 h-4 mr-1">
+					{@html getIconSVG('back')}
+				</div>
+				企業一覧に戻る
+			</a>
+		</div>
+
 		<!-- ヘッダー -->
 		<div class="mb-8 flex items-center justify-between">
 			<div>
-				<h1 class="text-3xl font-bold text-gray-900 mb-2">コンテンツ管理</h1>
-				<p class="text-gray-600">学習コンテンツの作成と管理</p>
+				<div class="flex items-center space-x-2 mb-2">
+					<span class="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
+						{data.company.company_code}
+					</span>
+				</div>
+				<h1 class="text-3xl font-bold text-gray-900 mb-2">{data.company.company_name}</h1>
+				<p class="text-gray-600">この企業専用のコンテンツを管理します</p>
 			</div>
 			<a
-				href="/admin/contents/new"
-				class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center space-x-2"
+				href="/admin/company-contents/{data.company.id}/new"
+				class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center space-x-2"
 			>
 				<div class="w-4 h-4">
 					{@html getIconSVG('plus')}
@@ -137,10 +132,10 @@
 			<div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-600 mb-1">総コンテンツ数</p>
+						<p class="text-sm text-gray-600 mb-1">専用コンテンツ数</p>
 						<p class="text-3xl font-bold text-gray-900">{data.contents.length}</p>
 					</div>
-					<div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
+					<div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
 						<div class="w-7 h-7">
 							{@html getIconSVG('document')}
 						</div>
@@ -197,7 +192,7 @@
 								>
 									<span>No.</span>
 									{#if sortBy === 'number'}
-										<span class="text-blue-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
 									{/if}
 								</button>
 							</th>
@@ -208,7 +203,7 @@
 								>
 									<span>タイトル</span>
 									{#if sortBy === 'title'}
-										<span class="text-blue-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
 									{/if}
 								</button>
 							</th>
@@ -219,7 +214,7 @@
 								>
 									<span>カテゴリ</span>
 									{#if sortBy === 'category'}
-										<span class="text-blue-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
 									{/if}
 								</button>
 							</th>
@@ -230,11 +225,10 @@
 								>
 									<span>種類</span>
 									{#if sortBy === 'type'}
-										<span class="text-blue-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
 									{/if}
 								</button>
 							</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ステータス</th>
 							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 								<button
 									on:click={() => toggleSort('created_at')}
@@ -242,7 +236,7 @@
 								>
 									<span>作成日</span>
 									{#if sortBy === 'created_at'}
-										<span class="text-blue-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
 									{/if}
 								</button>
 							</th>
@@ -253,7 +247,7 @@
 						{#each sortedContents as content}
 							<tr class="hover:bg-gray-50">
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm font-bold text-gray-900 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+									<div class="text-sm font-bold text-gray-900 bg-indigo-100 rounded-full w-8 h-8 flex items-center justify-center">
 										{content.number}
 									</div>
 								</td>
@@ -272,15 +266,10 @@
 									</span>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-										公開中
-									</span>
-								</td>
-								<td class="px-4 py-4 whitespace-nowrap">
 									<div class="text-sm text-gray-600">{formatDate(content.created_at)}</div>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap text-sm">
-									<a href="/admin/contents/edit/{content.id}" class="text-blue-600 hover:text-blue-700 font-medium mr-3">編集</a>
+									<a href="/admin/company-contents/{data.company.id}/edit/{content.id}" class="text-indigo-600 hover:text-indigo-700 font-medium mr-3">編集</a>
 									<button
 										on:click={() => openDeleteModal(content)}
 										class="text-red-600 hover:text-red-700 font-medium"
@@ -289,144 +278,18 @@
 									</button>
 								</td>
 							</tr>
+						{:else}
+							<tr>
+								<td colspan="6" class="px-6 py-12 text-center text-gray-500">
+									コンテンツがまだありません。「新規コンテンツ作成」から追加してください。
+								</td>
+							</tr>
 						{/each}
 					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
-
-	<!-- 新規コンテンツ作成モーダル -->
-	{#if showCreateModal}
-		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-				<div class="p-6 border-b border-gray-200 flex items-center justify-between">
-					<h2 class="text-xl font-bold text-gray-900">新規コンテンツ作成</h2>
-					<button
-						on:click={closeModals}
-						class="text-gray-400 hover:text-gray-600 transition-colors"
-					>
-						<div class="w-6 h-6">
-							{@html getIconSVG('x')}
-						</div>
-					</button>
-				</div>
-
-				{#if form?.error}
-					<div class="mx-6 mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-						<p class="text-red-800 text-sm font-medium">{form.error}</p>
-					</div>
-				{/if}
-
-				<form method="POST" action="?/createContent" use:enhance class="p-6 space-y-6">
-					<div>
-						<label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-							タイトル <span class="text-red-500">*</span>
-						</label>
-						<input
-							type="text"
-							id="title"
-							name="title"
-							bind:value={title}
-							required
-							placeholder="例: JavaScript入門"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-						/>
-					</div>
-
-					<div>
-						<label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-							説明
-						</label>
-						<textarea
-							id="description"
-							name="description"
-							bind:value={description}
-							rows="3"
-							placeholder="コンテンツの説明を入力"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-						></textarea>
-					</div>
-
-					<div>
-						<label for="content_type" class="block text-sm font-medium text-gray-700 mb-2">
-							コンテンツ種別 <span class="text-red-500">*</span>
-						</label>
-						<select
-							id="content_type"
-							name="content_type"
-							bind:value={contentType}
-							required
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-						>
-							<option value="video">動画</option>
-							<option value="text">テキスト</option>
-						</select>
-					</div>
-
-					<div>
-						<label for="content_url" class="block text-sm font-medium text-gray-700 mb-2">
-							コンテンツURL <span class="text-red-500">*</span>
-						</label>
-						<input
-							type="url"
-							id="content_url"
-							name="content_url"
-							bind:value={contentUrl}
-							required
-							placeholder="https://..."
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-						/>
-					</div>
-
-					<div>
-						<label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-							カテゴリ
-						</label>
-						<input
-							type="text"
-							id="category"
-							name="category"
-							bind:value={category}
-							placeholder="例: プログラミング基礎"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-						/>
-					</div>
-
-					<div>
-						<label for="order" class="block text-sm font-medium text-gray-700 mb-2">
-							表示順序
-						</label>
-						<input
-							type="number"
-							id="order"
-							name="order"
-							bind:value={order}
-							min="0"
-							placeholder="0"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-						/>
-					</div>
-
-					<div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
-						<button
-							type="button"
-							on:click={closeModals}
-							class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-						>
-							キャンセル
-						</button>
-						<button
-							type="submit"
-							class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-						>
-							作成する
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	{/if}
 
 	<!-- 削除確認モーダル -->
 	{#if showDeleteModal && selectedContent}

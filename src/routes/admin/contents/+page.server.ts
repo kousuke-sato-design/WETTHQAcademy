@@ -7,10 +7,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw new Error('Database not available');
 	}
 
-	// コンテンツ一覧を取得
+	// 共有コンテンツ一覧を取得（企業専用コンテンツを除外）
 	const contentsResult = await db.execute(`
 		SELECT id, title, description, content_type, content_url, category, "order", created_at
 		FROM contents
+		WHERE is_company_specific = 0 OR is_company_specific IS NULL
 		ORDER BY "order" ASC, created_at DESC
 	`);
 

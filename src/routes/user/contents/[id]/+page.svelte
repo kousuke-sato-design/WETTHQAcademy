@@ -97,12 +97,13 @@
 											></iframe>
 										</div>
 									{:else if item.type === 'r2_video' && item.content}
-										<div class="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-md">
+										<div class="aspect-video bg-black rounded-lg overflow-hidden shadow-md">
 											<video
 												controls
 												class="w-full h-full"
-												preload="none"
+												preload="auto"
 												playsinline
+												poster=""
 											>
 												<source src="/api/video/{item.content}" type="video/mp4" />
 												お使いのブラウザは動画再生をサポートしていません。

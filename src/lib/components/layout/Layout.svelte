@@ -5,7 +5,7 @@
 	import UserSidebar from './UserSidebar.svelte';
 	import type { User } from '$lib/auth/auth';
 
-	export let user: User;
+	export let user: User | null = null;
 	export let contents: Array<{ id: number; title: string; sidebar_icon: string; sidebar_order: number }> = [];
 
 	// モバイルサイドバー表示状態
@@ -18,9 +18,6 @@
 	function closeSidebar() {
 		sidebarOpen = false;
 	}
-
-	// デバッグ用
-	$: console.log('Layout - user.role:', user?.role, 'user:', user);
 </script>
 
 <div class="min-h-screen bg-gray-50">

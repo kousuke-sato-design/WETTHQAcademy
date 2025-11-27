@@ -4,11 +4,13 @@
 	import type { User } from '$lib/auth/auth';
 
 	export let user: User;
-	export let contents: Array<{ id: number; title: string; sidebar_icon: string; sidebar_order: number }> = [];
+	export let contents: Array<{ id: number; title: string; sidebar_icon: string; sidebar_order: number; is_company_specific?: boolean }> = [];
 
 	const dispatch = createEventDispatcher();
 
 	$: currentPath = $page.url.pathname;
+	$: sharedContents = contents.filter(c => !c.is_company_specific);
+	$: companyContents = contents.filter(c => c.is_company_specific);
 
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
@@ -43,13 +45,13 @@
 			<span>ダッシュボード</span>
 		</a>
 
-		<!-- 学習コンテンツ -->
-		{#if contents.length > 0}
+		<!-- 学習コンテンツ（共有） -->
+		{#if sharedContents.length > 0}
 			<div class="pt-4 mt-4 border-t border-gray-200">
 				<p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
 					学習コンテンツ
 				</p>
-				{#each contents as content}
+				{#each sharedContents as content}
 					<a
 						href="/user/contents/{content.id}"
 						on:click={handleLinkClick}
@@ -60,7 +62,35 @@
 						<div class="w-5 h-5 {currentPath === `/user/contents/${content.id}` ? 'text-blue-600' : 'text-gray-500'}">
 							{@html getIconSVG(content.sidebar_icon)}
 						</div>
-						<span>{content.title}</span>
+						<span class="truncate">{content.title}</span>
+					</a>
+				{/each}
+			</div>
+		{/if}
+
+		<!-- 企業専用コンテンツ -->
+		{#if companyContents.length > 0}
+			<div class="pt-4 mt-4 border-t border-gray-200">
+				<p class="px-4 text-xs font-semibold text-green-600 uppercase tracking-wider mb-2 flex items-center space-x-1">
+					<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+						<path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+					</svg>
+					<span>専用コンテンツ</span>
+				</p>
+				{#each companyContents as content}
+					<a
+						href="/user/contents/{content.id}"
+						on:click={handleLinkClick}
+						class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors {currentPath === `/user/contents/${content.id}`
+							? 'bg-green-50 text-green-700 font-medium'
+							: 'text-gray-700 hover:bg-gray-50'}"
+					>
+						<div class="w-5 h-5 {currentPath === `/user/contents/${content.id}` ? 'text-green-600' : 'text-gray-500'}">
+							{@html getIconSVG(content.sidebar_icon)}
+						</div>
+						<span class="truncate">{content.title}</span>
+						<span class="px-1.5 py-0.5 text-[10px] font-medium rounded bg-green-100 text-green-700">専用</span>
 					</a>
 				{/each}
 			</div>

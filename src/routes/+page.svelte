@@ -68,18 +68,18 @@
 						<p class="hidden sm:block text-xs text-gray-500">株式会社総合心理教育研究所</p>
 					</div>
 				</div>
-				<div class="flex items-center gap-2 sm:gap-3">
+				<div class="flex items-center gap-3 sm:gap-4">
 					<button
 						on:click={() => goto('/company/login')}
-						class="hidden sm:block px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+						class="hidden sm:block text-xs text-gray-400 hover:text-gray-600 transition-colors"
 					>
-						担当者
+						担当者の方
 					</button>
 					<button
 						on:click={() => goto('/user/login')}
 						class="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-medium rounded-lg transition-colors shadow-sm"
 					>
-						ログイン
+						受講者ログイン
 					</button>
 				</div>
 			</div>
@@ -282,7 +282,14 @@
 			<p class="text-sm text-gray-600">
 				© 2025 株式会社総合心理教育研究所. All rights reserved.
 			</p>
-			<div class="mt-6">
+			<div class="mt-6 flex items-center justify-center gap-4">
+				<a
+					href="/company/login"
+					class="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+				>
+					企業担当者ログイン
+				</a>
+				<span class="text-gray-700">|</span>
 				<a
 					href="/admin/login"
 					class="text-xs text-gray-700 hover:text-gray-500 transition-colors"
