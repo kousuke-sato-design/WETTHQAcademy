@@ -253,6 +253,21 @@
 		editingSection = { index, content: sections[index].content };
 		editorContent = sections[index].content;
 		activeTab = 'visual';
+		// ビジュアルエディタの初期化を遅延実行
+		setTimeout(() => {
+			const editor = document.getElementById('visualEditor');
+			if (editor) {
+				editor.innerHTML = editorContent;
+			}
+		}, 0);
+	}
+
+	// ビジュアルエディタの入力処理
+	function handleVisualInput(e: Event) {
+		const target = e.currentTarget as HTMLDivElement;
+		if (target) {
+			editorContent = target.innerHTML;
+		}
 	}
 
 	function closeEditor() {
@@ -604,7 +619,7 @@
 				</div>
 				<div class="flex-1 p-6 overflow-auto">
 					{#if activeTab === 'visual'}
-						<div bind:innerHTML={editorContent} contenteditable="true" on:input={(e) => editorContent = e.currentTarget.innerHTML} class="w-full h-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white prose max-w-none" style="min-height: 400px; outline: none;"></div>
+						<div id="visualEditor" contenteditable="true" on:input={handleVisualInput} on:blur={handleVisualInput} class="w-full h-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white prose max-w-none" style="min-height: 400px; outline: none;">{@html editorContent}</div>
 					{:else}
 						<textarea id="richTextArea" bind:value={editorContent} rows="20" placeholder="HTMLやテキストを入力してください..." class="w-full h-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm resize-none"></textarea>
 					{/if}

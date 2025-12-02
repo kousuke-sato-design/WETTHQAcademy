@@ -345,6 +345,21 @@
 		editingSection = { index, content: sections[index].content };
 		editorContent = sections[index].content;
 		activeTab = 'visual'; // 常にビジュアルタブから開始
+		// ビジュアルエディタの初期化を遅延実行
+		setTimeout(() => {
+			const editor = document.getElementById('visualEditor');
+			if (editor) {
+				editor.innerHTML = editorContent;
+			}
+		}, 0);
+	}
+
+	// ビジュアルエディタの入力処理
+	function handleVisualInput(e: Event) {
+		const target = e.currentTarget as HTMLDivElement;
+		if (target) {
+			editorContent = target.innerHTML;
+		}
 	}
 
 	// モーダルを閉じる
@@ -1120,12 +1135,13 @@
 					{#if activeTab === 'visual'}
 						<!-- ビジュアル編集タブ -->
 						<div
-							bind:innerHTML={editorContent}
+							id="visualEditor"
 							contenteditable="true"
-							on:input={(e) => editorContent = e.currentTarget.innerHTML}
+							on:input={handleVisualInput}
+							on:blur={handleVisualInput}
 							class="w-full h-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white prose max-w-none"
 							style="min-height: 400px; outline: none;"
-						></div>
+						>{@html editorContent}</div>
 					{:else}
 						<!-- HTMLコードタブ -->
 						<textarea
