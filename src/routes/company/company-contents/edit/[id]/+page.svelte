@@ -284,6 +284,45 @@
 	}
 
 	function insertHTML(tag: string, value: string = '') {
+		// ビジュアルモードの場合
+		if (activeTab === 'visual') {
+			const editor = document.getElementById('visualEditor');
+			if (!editor) return;
+
+			const selection = window.getSelection();
+			const selectedText = selection?.toString() || '';
+			let insertion = '';
+
+			switch (tag) {
+				case 'bold': insertion = `<strong>${selectedText || '太字テキスト'}</strong>`; break;
+				case 'italic': insertion = `<em>${selectedText || '斜体テキスト'}</em>`; break;
+				case 'h2': insertion = `<h2>${selectedText || '見出し2'}</h2>`; break;
+				case 'h3': insertion = `<h3>${selectedText || '見出し3'}</h3>`; break;
+				case 'ul': insertion = `<ul><li>${selectedText || 'リスト項目'}</li></ul>`; break;
+				case 'ol': insertion = `<ol><li>${selectedText || 'リスト項目'}</li></ol>`; break;
+				case 'color': insertion = `<span style="color: ${value};">${selectedText || 'カラーテキスト'}</span>`; break;
+				case 'bgcolor': insertion = `<span style="background-color: ${value};">${selectedText || 'マーカーテキスト'}</span>`; break;
+				case 'emoji': insertion = value; break;
+				case 'br': insertion = '<br>'; break;
+			}
+
+			editor.focus();
+			if (selection && selection.rangeCount > 0) {
+				const range = selection.getRangeAt(0);
+				range.deleteContents();
+				const fragment = range.createContextualFragment(insertion);
+				range.insertNode(fragment);
+				range.collapse(false);
+				selection.removeAllRanges();
+				selection.addRange(range);
+			} else {
+				editor.innerHTML += insertion;
+			}
+			editorContent = editor.innerHTML;
+			return;
+		}
+
+		// コードモードの場合
 		const textarea = document.getElementById('richTextArea') as HTMLTextAreaElement;
 		if (!textarea) return;
 
