@@ -12,53 +12,32 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const companyId = user?.company_id;
 	const isCompanyAdmin = user?.role === 'company_admin';
 
-	// この企業が閲覧許可を持っているコンテンツ + 企業専用コンテンツを取得（サイドバー用）
+	// この企業が閲覧許可を持っているコンテンツを取得（サイドバー用）
+	// 共有コンテンツも企業専用コンテンツも company_content_permissions の display_order を使用
 	let contentsResult;
-	if (companyId && !isCompanyAdmin) {
-		// 生徒の場合は許可された共有コンテンツ + 企業専用コンテンツ
+	if (companyId) {
 		contentsResult = await db.execute({
 			sql: `
-				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order, ccp.display_order, 0 as is_company_specific
+				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order, ccp.display_order,
+				       CASE WHEN c.is_company_specific = 1 THEN 1 ELSE 0 END as is_company_specific
 				FROM contents c
 				INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
 				WHERE c.show_in_sidebar = 1
 				AND ccp.company_id = ?
-				AND (c.is_company_specific = 0 OR c.is_company_specific IS NULL)
-
-				UNION ALL
-
-				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order, c.sidebar_order as display_order, 1 as is_company_specific
-				FROM contents c
-				WHERE c.show_in_sidebar = 1
-				AND c.is_company_specific = 1
-				AND c.target_company_id = ?
-
-				ORDER BY display_order ASC, sidebar_order ASC
+				ORDER BY ccp.display_order ASC, c.sidebar_order ASC
 			`,
-			args: [companyId, companyId]
+			args: [companyId]
 		});
 	} else {
-		// 統一IDユーザーまたは企業担当者の場合は許可されたコンテンツを表示
+		// 統一IDユーザーの場合は共有コンテンツのみ表示
 		contentsResult = await db.execute({
 			sql: `
-				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order, ccp.display_order, 0 as is_company_specific
-				FROM contents c
-				INNER JOIN company_content_permissions ccp ON c.id = ccp.content_id
-				WHERE c.show_in_sidebar = 1
-				AND ccp.company_id = ?
-				AND (c.is_company_specific = 0 OR c.is_company_specific IS NULL)
-
-				UNION ALL
-
-				SELECT c.id, c.title, c.sidebar_icon, c.sidebar_order, c.sidebar_order as display_order, 1 as is_company_specific
-				FROM contents c
-				WHERE c.show_in_sidebar = 1
-				AND c.is_company_specific = 1
-				AND c.target_company_id = ?
-
-				ORDER BY display_order ASC, sidebar_order ASC
-			`,
-			args: [companyId, companyId]
+				SELECT id, title, sidebar_icon, sidebar_order, 0 as display_order, 0 as is_company_specific
+				FROM contents
+				WHERE show_in_sidebar = 1
+				AND (is_company_specific = 0 OR is_company_specific IS NULL)
+				ORDER BY sidebar_order ASC, created_at ASC
+			`
 		});
 	}
 

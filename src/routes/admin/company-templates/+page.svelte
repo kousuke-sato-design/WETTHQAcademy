@@ -7,11 +7,12 @@
 	export let form: ActionData;
 
 	// タブ切り替え
-	let activeTab: 'companies' | 'contents' = 'companies';
+	let activeTab: 'companies' | 'templates' = 'companies';
 
 	// モーダル
 	let showCopyModal = false;
-	let selectedContent: any = null;
+	let showDetailModal = false;
+	let selectedTemplate: any = null;
 	let selectedCompanyIds: number[] = [];
 
 	// 検索・フィルター
@@ -19,7 +20,7 @@
 	let filterCompanyId: number | null = null;
 
 	// ソート設定
-	let sortBy: 'company' | 'title' | 'category' | 'type' | 'created_at' = 'company';
+	let sortBy: 'company' | 'title' | 'category' | 'created_at' = 'company';
 	let sortOrder: 'asc' | 'desc' = 'asc';
 
 	// 成功時にモーダルを閉じる
@@ -31,13 +32,35 @@
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
 			company: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>',
-			document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+			mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
 			arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
 			search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
 			copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-			list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
+			list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+			eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+			check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
 		};
 		return icons[iconName] || '';
+	}
+
+	function getCategoryLabel(category: string) {
+		const categories: Record<string, string> = {
+			'login': 'ログイン案内',
+			'reminder': 'リマインダー',
+			'notification': 'お知らせ',
+			'other': 'その他'
+		};
+		return categories[category] || category || '-';
+	}
+
+	function getCategoryBadgeClass(category: string) {
+		const classes: Record<string, string> = {
+			'login': 'bg-blue-100 text-blue-800',
+			'reminder': 'bg-yellow-100 text-yellow-800',
+			'notification': 'bg-green-100 text-green-800',
+			'other': 'bg-gray-100 text-gray-800'
+		};
+		return classes[category] || 'bg-gray-100 text-gray-800';
 	}
 
 	function toggleSort(column: typeof sortBy) {
@@ -49,18 +72,19 @@
 		}
 	}
 
-	function getTypeBadgeClass(type: string) {
-		return type === 'video' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
-	}
-
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString('ja-JP');
 	}
 
-	function openCopyModal(content: any) {
-		selectedContent = content;
+	function openCopyModal(template: any) {
+		selectedTemplate = template;
 		selectedCompanyIds = [];
 		showCopyModal = true;
+	}
+
+	function openDetailModal(template: any) {
+		selectedTemplate = template;
+		showDetailModal = true;
 	}
 
 	function toggleCompanySelection(companyId: number) {
@@ -72,9 +96,8 @@
 	}
 
 	function selectAllCompanies() {
-		// 現在のコンテンツの企業を除外
 		selectedCompanyIds = data.companies
-			.filter(c => c.id !== selectedContent?.target_company_id)
+			.filter(c => c.id !== selectedTemplate?.target_company_id)
 			.map(c => c.id);
 	}
 
@@ -84,36 +107,54 @@
 
 	function closeModals() {
 		showCopyModal = false;
-		selectedContent = null;
+		showDetailModal = false;
+		selectedTemplate = null;
 		selectedCompanyIds = [];
 	}
 
-	// 企業専用コンテンツの総数
-	$: totalCompanyContents = data.companies.reduce((sum, c) => sum + c.content_count, 0);
+	let copySuccess = false;
+	async function copyToClipboard(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+			copySuccess = true;
+			setTimeout(() => copySuccess = false, 2000);
+		} catch (err) {
+			console.error('Failed to copy:', err);
+		}
+	}
 
-	// コンテンツのフィルタリング＆ソート
-	$: filteredContents = (data.allContents || [])
-		.filter(content => {
-			// 検索フィルター
+	function openMailClient() {
+		if (selectedTemplate) {
+			const subject = encodeURIComponent(selectedTemplate.subject || '');
+			const body = encodeURIComponent(selectedTemplate.body || '');
+			window.location.href = `mailto:?subject=${subject}&body=${body}`;
+		}
+	}
+
+	// 企業専用テンプレートの総数
+	$: totalCompanyTemplates = data.companies.reduce((sum, c) => sum + c.template_count, 0);
+
+	// テンプレートのフィルタリング＆ソート
+	$: filteredTemplates = (data.allTemplates || [])
+		.filter(template => {
 			if (searchQuery) {
 				const query = searchQuery.toLowerCase();
-				const matchesTitle = content.title.toLowerCase().includes(query);
-				const matchesDescription = content.description?.toLowerCase().includes(query);
-				const matchesCategory = content.category?.toLowerCase().includes(query);
-				const matchesCompany = content.company_name?.toLowerCase().includes(query);
-				if (!matchesTitle && !matchesDescription && !matchesCategory && !matchesCompany) {
+				const matchesTitle = template.title.toLowerCase().includes(query);
+				const matchesSubject = template.subject?.toLowerCase().includes(query);
+				const matchesBody = template.body?.toLowerCase().includes(query);
+				const matchesCompany = template.company_name?.toLowerCase().includes(query);
+				if (!matchesTitle && !matchesSubject && !matchesBody && !matchesCompany) {
 					return false;
 				}
 			}
-			// 企業フィルター
-			if (filterCompanyId !== null && content.target_company_id !== filterCompanyId) {
+			if (filterCompanyId !== null && template.target_company_id !== filterCompanyId) {
 				return false;
 			}
 			return true;
 		})
-		.map((content, index, arr) => ({
-			...content,
-			number: arr.filter((c, i) => c.target_company_id === content.target_company_id && i <= index).length
+		.map((template, index, arr) => ({
+			...template,
+			number: arr.filter((t, i) => t.target_company_id === template.target_company_id && i <= index).length
 		}))
 		.sort((a, b) => {
 			let comparison = 0;
@@ -127,9 +168,6 @@
 				case 'category':
 					comparison = (a.category || '').localeCompare(b.category || '', 'ja');
 					break;
-				case 'type':
-					comparison = a.content_type.localeCompare(b.content_type);
-					break;
 				case 'created_at':
 					comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
 					break;
@@ -137,21 +175,40 @@
 			return sortOrder === 'asc' ? comparison : -comparison;
 		});
 
-	// コピー先企業（選択中コンテンツの企業を除外）
-	$: copyTargetCompanies = data.companies.filter(c => c.id !== selectedContent?.target_company_id);
+	// コピー先企業（選択中テンプレートの企業を除外）
+	$: copyTargetCompanies = data.companies.filter(c => c.id !== selectedTemplate?.target_company_id);
 </script>
 
 <svelte:head>
-	<title>企業専用コンテンツ - WEBTHQAcademy</title>
+	<title>企業専用テンプレート - WEBTHQAcademy</title>
 </svelte:head>
 
 <Layout user={data.user}>
 	<div class="max-w-6xl">
 		<!-- ヘッダー -->
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-gray-900 mb-2">企業専用コンテンツ</h1>
-			<p class="text-gray-600">企業を選択して、その企業専用のコンテンツを管理します</p>
+			<div class="flex items-center justify-between">
+				<div>
+					<h1 class="text-3xl font-bold text-gray-900 mb-2">企業専用テンプレート</h1>
+					<p class="text-gray-600">企業を選択して、その企業専用のメールテンプレートを管理します</p>
+				</div>
+				<a href="/admin/templates" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+					共通テンプレートへ
+				</a>
+			</div>
 		</div>
+
+		<!-- エラー/成功メッセージ -->
+		{#if form?.error}
+			<div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+				{form.error}
+			</div>
+		{/if}
+		{#if form?.success}
+			<div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+				{form.message}
+			</div>
+		{/if}
 
 		<!-- 統計カード -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -172,12 +229,12 @@
 			<div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-600 mb-1">企業専用コンテンツ総数</p>
-						<p class="text-3xl font-bold text-gray-900">{totalCompanyContents}</p>
+						<p class="text-sm text-gray-600 mb-1">企業専用テンプレート総数</p>
+						<p class="text-3xl font-bold text-gray-900">{totalCompanyTemplates}</p>
 					</div>
 					<div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
 						<div class="w-7 h-7">
-							{@html getIconSVG('document')}
+							{@html getIconSVG('mail')}
 						</div>
 					</div>
 				</div>
@@ -199,13 +256,13 @@
 						</div>
 					</button>
 					<button
-						on:click={() => activeTab = 'contents'}
-						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'contents' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+						on:click={() => activeTab = 'templates'}
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'templates' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
 					>
 						<div class="flex items-center space-x-2">
 							<div class="w-4 h-4">{@html getIconSVG('list')}</div>
-							<span>全コンテンツ一覧</span>
-							<span class="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{(data.allContents || []).length}</span>
+							<span>全テンプレート一覧</span>
+							<span class="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{(data.allTemplates || []).length}</span>
 						</div>
 					</button>
 				</nav>
@@ -221,7 +278,7 @@
 			<div class="divide-y divide-gray-200">
 				{#each data.companies as company}
 					<a
-						href="/admin/company-contents/{company.id}"
+						href="/admin/company-templates/{company.id}"
 						class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
 					>
 						<div class="flex items-center space-x-4">
@@ -237,8 +294,8 @@
 						</div>
 						<div class="flex items-center space-x-4">
 							<div class="text-right">
-								<p class="text-sm font-medium text-gray-900">{company.content_count}</p>
-								<p class="text-xs text-gray-500">コンテンツ</p>
+								<p class="text-sm font-medium text-gray-900">{company.template_count}</p>
+								<p class="text-xs text-gray-500">テンプレート</p>
 							</div>
 							<div class="w-5 h-5 text-gray-400">
 								{@html getIconSVG('arrow')}
@@ -254,12 +311,12 @@
 		</div>
 		{/if}
 
-		<!-- 全コンテンツ一覧タブ -->
-		{#if activeTab === 'contents'}
+		<!-- 全テンプレート一覧タブ -->
+		{#if activeTab === 'templates'}
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200">
 			<div class="px-6 py-4 border-b border-gray-200">
 				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-					<h2 class="text-lg font-semibold text-gray-900">全企業のコンテンツ一覧</h2>
+					<h2 class="text-lg font-semibold text-gray-900">全企業のテンプレート一覧</h2>
 					<div class="flex flex-col sm:flex-row gap-3">
 						<!-- 検索ボックス -->
 						<div class="relative">
@@ -269,7 +326,7 @@
 							<input
 								type="text"
 								bind:value={searchQuery}
-								placeholder="タイトル、カテゴリ、企業名で検索..."
+								placeholder="タイトル、件名、企業名で検索..."
 								class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full sm:w-64"
 							/>
 						</div>
@@ -326,17 +383,6 @@
 							</th>
 							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 								<button
-									on:click={() => toggleSort('type')}
-									class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
-								>
-									<span>種類</span>
-									{#if sortBy === 'type'}
-										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
-									{/if}
-								</button>
-							</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								<button
 									on:click={() => toggleSort('created_at')}
 									class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
 								>
@@ -350,38 +396,41 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-200">
-						{#each filteredContents as content}
+						{#each filteredTemplates as template}
 							<tr class="hover:bg-gray-50">
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm font-medium text-gray-900">{content.company_name}</div>
-									<div class="text-xs text-gray-500">{content.company_code}</div>
+									<div class="text-sm font-medium text-gray-900">{template.company_name}</div>
+									<div class="text-xs text-gray-500">{template.company_code}</div>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
 									<div class="text-sm font-bold text-gray-900 bg-indigo-100 rounded-full w-8 h-8 flex items-center justify-center">
-										{content.number}
+										{template.number}
 									</div>
 								</td>
 								<td class="px-4 py-4">
-									<div class="text-sm font-medium text-gray-900">{content.title}</div>
-									{#if content.description}
-										<div class="text-xs text-gray-500 mt-1 line-clamp-2">{content.description}</div>
+									<div class="text-sm font-medium text-gray-900">{template.title}</div>
+									{#if template.subject}
+										<div class="text-xs text-gray-500 mt-1">件名: {template.subject}</div>
 									{/if}
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm text-gray-600">{content.category || '-'}</div>
-								</td>
-								<td class="px-4 py-4 whitespace-nowrap">
-									<span class="px-2 py-1 text-xs font-medium rounded-full {getTypeBadgeClass(content.content_type)}">
-										{content.content_type === 'video' ? '動画' : 'テキスト'}
+									<span class="px-2 py-1 text-xs font-medium rounded-full {getCategoryBadgeClass(template.category || '')}">
+										{getCategoryLabel(template.category || '')}
 									</span>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm text-gray-600">{formatDate(content.created_at)}</div>
+									<div class="text-sm text-gray-600">{formatDate(template.created_at)}</div>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap text-sm">
-									<a href="/admin/company-contents/{content.target_company_id}/edit/{content.id}" class="text-indigo-600 hover:text-indigo-700 font-medium mr-3">編集</a>
 									<button
-										on:click={() => openCopyModal(content)}
+										on:click={() => openDetailModal(template)}
+										class="text-indigo-600 hover:text-indigo-700 font-medium mr-3"
+									>
+										詳細
+									</button>
+									<a href="/admin/company-templates/{template.target_company_id}/edit/{template.id}" class="text-blue-600 hover:text-blue-700 font-medium mr-3">編集</a>
+									<button
+										on:click={() => openCopyModal(template)}
 										class="text-green-600 hover:text-green-700 font-medium"
 									>
 										コピー
@@ -390,11 +439,11 @@
 							</tr>
 						{:else}
 							<tr>
-								<td colspan="7" class="px-6 py-12 text-center text-gray-500">
+								<td colspan="6" class="px-6 py-12 text-center text-gray-500">
 									{#if searchQuery || filterCompanyId !== null}
-										検索条件に一致するコンテンツがありません。
+										検索条件に一致するテンプレートがありません。
 									{:else}
-										企業専用コンテンツがまだありません。
+										企業専用テンプレートがまだありません。
 									{/if}
 								</td>
 							</tr>
@@ -402,12 +451,12 @@
 					</tbody>
 				</table>
 			</div>
-			{#if filteredContents.length > 0}
+			{#if filteredTemplates.length > 0}
 			<div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
 				<p class="text-sm text-gray-600">
-					{filteredContents.length}件のコンテンツを表示中
+					{filteredTemplates.length}件のテンプレートを表示中
 					{#if searchQuery || filterCompanyId !== null}
-						（全{(data.allContents || []).length}件中）
+						（全{(data.allTemplates || []).length}件中）
 					{/if}
 				</p>
 			</div>
@@ -416,8 +465,84 @@
 		{/if}
 	</div>
 
+	<!-- 詳細モーダル -->
+	{#if showDetailModal && selectedTemplate}
+		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+				<div class="p-6 border-b border-gray-200">
+					<div class="flex items-center justify-between">
+						<div>
+							<h2 class="text-xl font-bold text-gray-900">{selectedTemplate.title}</h2>
+							<p class="text-sm text-gray-500 mt-1">{selectedTemplate.company_name}</p>
+						</div>
+						<span class="px-2 py-1 text-xs font-medium rounded-full {getCategoryBadgeClass(selectedTemplate.category || '')}">
+							{getCategoryLabel(selectedTemplate.category || '')}
+						</span>
+					</div>
+				</div>
+
+				<div class="flex-1 overflow-y-auto p-6 space-y-4">
+					{#if selectedTemplate.subject}
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">件名</label>
+							<div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+								{selectedTemplate.subject}
+							</div>
+						</div>
+					{/if}
+
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">本文</label>
+						<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 whitespace-pre-wrap text-sm">
+							{selectedTemplate.body}
+						</div>
+					</div>
+
+					{#if selectedTemplate.description}
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">説明</label>
+							<div class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm text-gray-600">
+								{selectedTemplate.description}
+							</div>
+						</div>
+					{/if}
+				</div>
+
+				<div class="p-4 border-t border-gray-200 bg-gray-50">
+					<div class="flex flex-wrap gap-3">
+						<button
+							on:click={() => copyToClipboard(selectedTemplate.body)}
+							class="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+						>
+							{#if copySuccess}
+								<div class="w-4 h-4 mr-2">{@html getIconSVG('check')}</div>
+								<span>コピーしました</span>
+							{:else}
+								<div class="w-4 h-4 mr-2">{@html getIconSVG('copy')}</div>
+								<span>本文をコピー</span>
+							{/if}
+						</button>
+						<button
+							on:click={openMailClient}
+							class="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+						>
+							<div class="w-4 h-4 mr-2">{@html getIconSVG('mail')}</div>
+							<span>メールで開く</span>
+						</button>
+						<button
+							on:click={closeModals}
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors ml-auto"
+						>
+							閉じる
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	<!-- コピーモーダル -->
-	{#if showCopyModal && selectedContent}
+	{#if showCopyModal && selectedTemplate}
 		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
 			<div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
 				<div class="p-6 border-b border-gray-200">
@@ -428,10 +553,10 @@
 					</div>
 					<h2 class="text-xl font-bold text-gray-900 text-center mb-2">他の企業にコピー</h2>
 					<p class="text-gray-600 text-center text-sm">
-						「{selectedContent.title}」をコピーする企業を選択してください
+						「{selectedTemplate.title}」をコピーする企業を選択してください
 					</p>
 					<p class="text-gray-500 text-center text-xs mt-1">
-						現在の所属: {selectedContent.company_name}
+						現在の所属: {selectedTemplate.company_name}
 					</p>
 				</div>
 
@@ -487,8 +612,8 @@
 				</div>
 
 				<div class="p-4 border-t border-gray-200 bg-gray-50">
-					<form method="POST" action="?/copyContent" use:enhance class="space-y-3">
-						<input type="hidden" name="contentId" value={selectedContent.id} />
+					<form method="POST" action="?/copyTemplate" use:enhance class="space-y-3">
+						<input type="hidden" name="templateId" value={selectedTemplate.id} />
 						{#each selectedCompanyIds as companyId}
 							<input type="hidden" name="targetCompanyIds" value={companyId} />
 						{/each}

@@ -183,6 +183,16 @@
 						</ul>
 					</div>
 
+					<div class="bg-red-50 border-l-4 border-red-500 p-4">
+						<h3 class="font-bold text-red-900 mb-2">⚠️ スマートフォンでの動画視聴について</h3>
+						<p class="text-red-900 mb-2"><strong>モバイルデータ通信で動画を視聴すると、データ通信容量を大きく消費します。</strong></p>
+						<ul class="list-disc list-inside space-y-1 text-red-900">
+							<li>Wi-Fi環境での視聴を強く推奨します</li>
+							<li>動画コンテンツは数十MB〜数百MBのデータ量になることがあります</li>
+							<li>通信制限がかかる可能性がありますのでご注意ください</li>
+						</ul>
+					</div>
+
 					<div class="bg-purple-50 border-l-4 border-purple-500 p-4">
 						<h3 class="font-bold text-purple-900 mb-2">⏰ 学習時間の確保</h3>
 						<ul class="list-disc list-inside space-y-1 text-purple-900">
@@ -246,6 +256,32 @@
 		<div class="mt-12 bg-green-50 border-l-4 border-green-500 p-6 rounded no-print">
 			<h3 class="font-bold text-green-900 mb-2">📞 サポート</h3>
 			<p class="text-green-900">ご不明な点がございましたら、企業担当者またはシステム管理者までお問い合わせください。</p>
+		</div>
+
+		<!-- バージョン履歴 -->
+		<div class="mt-8 bg-gray-100 border border-gray-300 p-6 rounded">
+			<h3 class="font-bold text-gray-700 mb-3">📋 更新履歴</h3>
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-gray-300">
+						<th class="text-left py-2 pr-4 text-gray-600">バージョン</th>
+						<th class="text-left py-2 pr-4 text-gray-600">更新日</th>
+						<th class="text-left py-2 text-gray-600">更新内容</th>
+					</tr>
+				</thead>
+				<tbody class="text-gray-700">
+					<tr class="border-b border-gray-200">
+						<td class="py-2 pr-4 font-medium">v1.1.0</td>
+						<td class="py-2 pr-4">2024/12/02</td>
+						<td class="py-2">スマートフォンでの動画視聴時のデータ通信に関する注意事項を追加</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-4 font-medium">v1.0.0</td>
+						<td class="py-2 pr-4">2024/10/01</td>
+						<td class="py-2">初版作成</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
 		<!-- 戻るボタン -->

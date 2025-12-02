@@ -7,11 +7,14 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	// 基本情報
-	let title = data.content.title;
-	let description = data.content.description || '';
-	let category = data.content.category || '';
-	let order = data.content.order.toString();
+	// 初期化フラグ（ページ読み込み時のみ初期化 - 再初期化を防止）
+	let initialized = false;
+
+	// 基本情報（初期値は空 - リアクティブブロックで初期化）
+	let title = '';
+	let description = '';
+	let category = '';
+	let order = '0';
 
 	// セクションタイプ
 	type SectionType = 'text' | 'attachment' | 'video' | 'r2_video';
@@ -36,40 +39,48 @@
 	let availableVideos: R2Video[] = [];
 	let loadingVideos = false;
 
-	// 既存データから初期化
+	// セクションデータ（初期値は空 - リアクティブブロックで初期化）
 	let sections: Section[] = [];
-	if (data.sections && data.sections.length > 0) {
-		sections = data.sections.map((s: any, index: number) => {
-			// sectionType, section_type, または type から取得（後方互換性のため）
-			const sectionType = s.sectionType || s.section_type || s.type || 'text';
 
-			// itemsから適切な形式に変換
-			let content = '';
-			if (Array.isArray(s.items) && s.items.length > 0) {
-				if (s.items[0].type === 'video' || s.items[0].type === 'r2_video') {
-					content = s.items[0].content || '';
-				} else if (s.items[0].type === 'text') {
-					content = s.items.map((item: any) => item.content).join('\n\n');
-				} else {
-					content = s.items[0].content || '';
-				}
-			}
-
-			return {
-				type: (sectionType === 'video' ? 'video' : sectionType === 'r2_video' ? 'r2_video' : sectionType === 'attachment' ? 'attachment' : 'text') as SectionType,
-				title: s.title || '',
-				content: content,
-				order: index
-			};
-		});
-	}
-
-	// 基本情報のみリアクティブに更新（セクションは保持）
-	$: {
+	// データ初期化（一度だけ実行 - フォーム送信後の再初期化を防止）
+	$: if (!initialized && data.content) {
+		console.log('=== INITIALIZING DATA (once only) ===');
 		title = data.content.title;
 		description = data.content.description || '';
 		category = data.content.category || '';
 		order = data.content.order.toString();
+
+		// セクションの初期化
+		if (data.sections && data.sections.length > 0) {
+			sections = data.sections.map((s: any, index: number) => {
+				// sectionType, section_type, または type から取得（後方互換性のため）
+				const sectionType = s.sectionType || s.section_type || s.type || 'text';
+
+				// itemsから適切な形式に変換
+				let content = '';
+				if (Array.isArray(s.items) && s.items.length > 0) {
+					if (s.items[0].type === 'video' || s.items[0].type === 'r2_video') {
+						content = s.items[0].content || '';
+					} else if (s.items[0].type === 'text') {
+						content = s.items.map((item: any) => item.content).join('\n\n');
+					} else {
+						content = s.items[0].content || '';
+					}
+				}
+
+				return {
+					type: (sectionType === 'video' ? 'video' : sectionType === 'r2_video' ? 'r2_video' : sectionType === 'attachment' ? 'attachment' : 'text') as SectionType,
+					title: s.title || '',
+					content: content,
+					order: index
+				};
+			});
+		}
+
+		initialized = true;
+		console.log('=== DATA INITIALIZED ===');
+		console.log('Title:', title);
+		console.log('Sections count:', sections.length);
 	}
 
 	// セクションを追加

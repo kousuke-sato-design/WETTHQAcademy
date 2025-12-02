@@ -8,41 +8,56 @@
 
 	let showDeleteModal = false;
 	let showCopyModal = false;
-	let selectedContent: any = null;
+	let showCreateModal = false;
+	let showDetailModal = false;
+	let selectedTemplate: any = null;
 	let selectedCompanyIds: number[] = [];
 
 	// タブ切り替え
 	let activeTab: 'current' | 'all' = 'current';
 
-	// 検索・フィルター（全コンテンツ用）
+	// 検索・フィルター（全テンプレート用）
 	let searchQuery = '';
 	let filterCompanyId: number | null = null;
 
 	// ソート設定
-	let sortBy: 'number' | 'title' | 'category' | 'type' | 'created_at' = 'number';
+	let sortBy: 'number' | 'title' | 'category' | 'created_at' = 'number';
 	let sortOrder: 'asc' | 'desc' = 'asc';
 
-	// 全コンテンツ用ソート設定
-	let allSortBy: 'company' | 'title' | 'category' | 'type' | 'created_at' = 'company';
+	// 全テンプレート用ソート設定
+	let allSortBy: 'company' | 'title' | 'category' | 'created_at' = 'company';
 	let allSortOrder: 'asc' | 'desc' = 'asc';
+
+	// フォームデータ
+	let createTitle = '';
+	let createSubject = '';
+	let createBody = '';
+	let createDescription = '';
+	let createCategory = 'login';
 
 	// 成功時にモーダルを閉じる
 	$: if (form?.success) {
 		showDeleteModal = false;
 		showCopyModal = false;
+		showCreateModal = false;
 		selectedCompanyIds = [];
+		createTitle = '';
+		createSubject = '';
+		createBody = '';
+		createDescription = '';
+		createCategory = 'login';
 	}
 
-	// 作成日順に番号を付与したコンテンツ
-	$: numberedContents = [...data.contents]
+	// 作成日順に番号を付与したテンプレート
+	$: numberedTemplates = [...data.templates]
 		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-		.map((content, index) => ({
-			...content,
+		.map((template, index) => ({
+			...template,
 			number: index + 1
 		}));
 
-	// ソートされたコンテンツ
-	$: sortedContents = [...numberedContents].sort((a, b) => {
+	// ソートされたテンプレート
+	$: sortedTemplates = [...numberedTemplates].sort((a, b) => {
 		let comparison = 0;
 		switch (sortBy) {
 			case 'number':
@@ -53,9 +68,6 @@
 				break;
 			case 'category':
 				comparison = (a.category || '').localeCompare(b.category || '', 'ja');
-				break;
-			case 'type':
-				comparison = a.content_type.localeCompare(b.content_type);
 				break;
 			case 'created_at':
 				comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
@@ -82,29 +94,27 @@
 		}
 	}
 
-	// 全コンテンツのフィルタリング＆ソート
-	$: filteredAllContents = (data.allContents || [])
-		.filter(content => {
-			// 検索フィルター
+	// 全テンプレートのフィルタリング＆ソート
+	$: filteredAllTemplates = (data.allTemplates || [])
+		.filter(template => {
 			if (searchQuery) {
 				const query = searchQuery.toLowerCase();
-				const matchesTitle = content.title.toLowerCase().includes(query);
-				const matchesDescription = content.description?.toLowerCase().includes(query);
-				const matchesCategory = content.category?.toLowerCase().includes(query);
-				const matchesCompany = content.company_name?.toLowerCase().includes(query);
-				if (!matchesTitle && !matchesDescription && !matchesCategory && !matchesCompany) {
+				const matchesTitle = template.title.toLowerCase().includes(query);
+				const matchesSubject = template.subject?.toLowerCase().includes(query);
+				const matchesBody = template.body?.toLowerCase().includes(query);
+				const matchesCompany = template.company_name?.toLowerCase().includes(query);
+				if (!matchesTitle && !matchesSubject && !matchesBody && !matchesCompany) {
 					return false;
 				}
 			}
-			// 企業フィルター
-			if (filterCompanyId !== null && content.target_company_id !== filterCompanyId) {
+			if (filterCompanyId !== null && template.target_company_id !== filterCompanyId) {
 				return false;
 			}
 			return true;
 		})
-		.map((content, index, arr) => ({
-			...content,
-			number: arr.filter((c, i) => c.target_company_id === content.target_company_id && i <= index).length
+		.map((template, index, arr) => ({
+			...template,
+			number: arr.filter((t, i) => t.target_company_id === template.target_company_id && i <= index).length
 		}))
 		.sort((a, b) => {
 			let comparison = 0;
@@ -118,9 +128,6 @@
 				case 'category':
 					comparison = (a.category || '').localeCompare(b.category || '', 'ja');
 					break;
-				case 'type':
-					comparison = a.content_type.localeCompare(b.content_type);
-					break;
 				case 'created_at':
 					comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
 					break;
@@ -130,36 +137,56 @@
 
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
-			document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-			video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
+			mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
 			plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-			x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
 			trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
 			back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
 			copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
 			search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
-			list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
+			list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+			check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
 		};
 		return icons[iconName] || '';
 	}
 
-	function getTypeBadgeClass(type: string) {
-		return type === 'video' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+	function getCategoryLabel(category: string) {
+		const categories: Record<string, string> = {
+			'login': 'ログイン案内',
+			'reminder': 'リマインダー',
+			'notification': 'お知らせ',
+			'other': 'その他'
+		};
+		return categories[category] || category || '-';
+	}
+
+	function getCategoryBadgeClass(category: string) {
+		const classes: Record<string, string> = {
+			'login': 'bg-blue-100 text-blue-800',
+			'reminder': 'bg-yellow-100 text-yellow-800',
+			'notification': 'bg-green-100 text-green-800',
+			'other': 'bg-gray-100 text-gray-800'
+		};
+		return classes[category] || 'bg-gray-100 text-gray-800';
 	}
 
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString('ja-JP');
 	}
 
-	function openDeleteModal(content: any) {
-		selectedContent = content;
+	function openDeleteModal(template: any) {
+		selectedTemplate = template;
 		showDeleteModal = true;
 	}
 
-	function openCopyModal(content: any) {
-		selectedContent = content;
+	function openCopyModal(template: any) {
+		selectedTemplate = template;
 		selectedCompanyIds = [];
 		showCopyModal = true;
+	}
+
+	function openDetailModal(template: any) {
+		selectedTemplate = template;
+		showDetailModal = true;
 	}
 
 	function toggleCompanySelection(companyId: number) {
@@ -181,20 +208,41 @@
 	function closeModals() {
 		showDeleteModal = false;
 		showCopyModal = false;
-		selectedContent = null;
+		showCreateModal = false;
+		showDetailModal = false;
+		selectedTemplate = null;
 		selectedCompanyIds = [];
+	}
+
+	let copySuccess = false;
+	async function copyToClipboard(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+			copySuccess = true;
+			setTimeout(() => copySuccess = false, 2000);
+		} catch (err) {
+			console.error('Failed to copy:', err);
+		}
+	}
+
+	function openMailClient() {
+		if (selectedTemplate) {
+			const subject = encodeURIComponent(selectedTemplate.subject || '');
+			const body = encodeURIComponent(selectedTemplate.body || '');
+			window.location.href = `mailto:?subject=${subject}&body=${body}`;
+		}
 	}
 </script>
 
 <svelte:head>
-	<title>{data.company.company_name} - 企業専用コンテンツ - WEBTHQAcademy</title>
+	<title>{data.company.company_name} - 企業専用テンプレート - WEBTHQAcademy</title>
 </svelte:head>
 
 <Layout user={data.user}>
 	<div class="max-w-6xl">
 		<!-- パンくずナビ -->
 		<div class="mb-4">
-			<a href="/admin/company-contents" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+			<a href="/admin/company-templates" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
 				<div class="w-4 h-4 mr-1">
 					{@html getIconSVG('back')}
 				</div>
@@ -211,30 +259,42 @@
 					</span>
 				</div>
 				<h1 class="text-3xl font-bold text-gray-900 mb-2">{data.company.company_name}</h1>
-				<p class="text-gray-600">この企業専用のコンテンツを管理します</p>
+				<p class="text-gray-600">この企業専用のメールテンプレートを管理します</p>
 			</div>
-			<a
-				href="/admin/company-contents/{data.company.id}/new"
+			<button
+				on:click={() => showCreateModal = true}
 				class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center space-x-2"
 			>
 				<div class="w-4 h-4">
 					{@html getIconSVG('plus')}
 				</div>
-				<span>新規コンテンツ作成</span>
-			</a>
+				<span>新規テンプレート作成</span>
+			</button>
 		</div>
+
+		<!-- エラー/成功メッセージ -->
+		{#if form?.error}
+			<div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+				{form.error}
+			</div>
+		{/if}
+		{#if form?.success}
+			<div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+				{form.message}
+			</div>
+		{/if}
 
 		<!-- 統計カード -->
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 			<div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-600 mb-1">専用コンテンツ数</p>
-						<p class="text-3xl font-bold text-gray-900">{data.contents.length}</p>
+						<p class="text-sm text-gray-600 mb-1">専用テンプレート数</p>
+						<p class="text-3xl font-bold text-gray-900">{data.templates.length}</p>
 					</div>
 					<div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
 						<div class="w-7 h-7">
-							{@html getIconSVG('document')}
+							{@html getIconSVG('mail')}
 						</div>
 					</div>
 				</div>
@@ -243,14 +303,14 @@
 			<div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-600 mb-1">動画コンテンツ</p>
+						<p class="text-sm text-gray-600 mb-1">ログイン案内</p>
 						<p class="text-3xl font-bold text-gray-900">
-							{data.contents.filter(c => c.content_type === 'video').length}
+							{data.templates.filter(t => t.category === 'login').length}
 						</p>
 					</div>
-					<div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+					<div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
 						<div class="w-7 h-7">
-							{@html getIconSVG('video')}
+							{@html getIconSVG('mail')}
 						</div>
 					</div>
 				</div>
@@ -259,14 +319,14 @@
 			<div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-gray-600 mb-1">テキストコンテンツ</p>
+						<p class="text-sm text-gray-600 mb-1">その他テンプレート</p>
 						<p class="text-3xl font-bold text-gray-900">
-							{data.contents.filter(c => c.content_type === 'text').length}
+							{data.templates.filter(t => t.category !== 'login').length}
 						</p>
 					</div>
 					<div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white">
 						<div class="w-7 h-7">
-							{@html getIconSVG('document')}
+							{@html getIconSVG('mail')}
 						</div>
 					</div>
 				</div>
@@ -282,9 +342,9 @@
 						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'current' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
 					>
 						<div class="flex items-center space-x-2">
-							<div class="w-4 h-4">{@html getIconSVG('document')}</div>
-							<span>この企業のコンテンツ</span>
-							<span class="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{data.contents.length}</span>
+							<div class="w-4 h-4">{@html getIconSVG('mail')}</div>
+							<span>この企業のテンプレート</span>
+							<span class="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{data.templates.length}</span>
 						</div>
 					</button>
 					<button
@@ -293,19 +353,19 @@
 					>
 						<div class="flex items-center space-x-2">
 							<div class="w-4 h-4">{@html getIconSVG('list')}</div>
-							<span>全企業のコンテンツ</span>
-							<span class="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{(data.allContents || []).length}</span>
+							<span>全企業のテンプレート</span>
+							<span class="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{(data.allTemplates || []).length}</span>
 						</div>
 					</button>
 				</nav>
 			</div>
 		</div>
 
-		<!-- この企業のコンテンツ -->
+		<!-- この企業のテンプレート -->
 		{#if activeTab === 'current'}
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200">
 			<div class="px-6 py-4 border-b border-gray-200">
-				<h2 class="text-lg font-semibold text-gray-900">コンテンツ一覧</h2>
+				<h2 class="text-lg font-semibold text-gray-900">テンプレート一覧</h2>
 			</div>
 			<div class="overflow-x-auto">
 				<table class="w-full">
@@ -346,17 +406,6 @@
 							</th>
 							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 								<button
-									on:click={() => toggleSort('type')}
-									class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
-								>
-									<span>種類</span>
-									{#if sortBy === 'type'}
-										<span class="text-indigo-600">{sortOrder === 'asc' ? '▲' : '▼'}</span>
-									{/if}
-								</button>
-							</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								<button
 									on:click={() => toggleSort('created_at')}
 									class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
 								>
@@ -370,40 +419,43 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-200">
-						{#each sortedContents as content}
+						{#each sortedTemplates as template}
 							<tr class="hover:bg-gray-50">
 								<td class="px-4 py-4 whitespace-nowrap">
 									<div class="text-sm font-bold text-gray-900 bg-indigo-100 rounded-full w-8 h-8 flex items-center justify-center">
-										{content.number}
+										{template.number}
 									</div>
 								</td>
 								<td class="px-4 py-4">
-									<div class="text-sm font-medium text-gray-900">{content.title}</div>
-									{#if content.description}
-										<div class="text-xs text-gray-500 mt-1">{content.description}</div>
+									<div class="text-sm font-medium text-gray-900">{template.title}</div>
+									{#if template.subject}
+										<div class="text-xs text-gray-500 mt-1">件名: {template.subject}</div>
 									{/if}
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm text-gray-600">{content.category || '-'}</div>
-								</td>
-								<td class="px-4 py-4 whitespace-nowrap">
-									<span class="px-2 py-1 text-xs font-medium rounded-full {getTypeBadgeClass(content.content_type)}">
-										{content.content_type === 'video' ? '動画' : 'テキスト'}
+									<span class="px-2 py-1 text-xs font-medium rounded-full {getCategoryBadgeClass(template.category || '')}">
+										{getCategoryLabel(template.category || '')}
 									</span>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm text-gray-600">{formatDate(content.created_at)}</div>
+									<div class="text-sm text-gray-600">{formatDate(template.created_at)}</div>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap text-sm">
-									<a href="/admin/company-contents/{data.company.id}/edit/{content.id}" class="text-indigo-600 hover:text-indigo-700 font-medium mr-3">編集</a>
 									<button
-										on:click={() => openCopyModal(content)}
+										on:click={() => openDetailModal(template)}
+										class="text-indigo-600 hover:text-indigo-700 font-medium mr-3"
+									>
+										詳細
+									</button>
+									<a href="/admin/company-templates/{data.company.id}/edit/{template.id}" class="text-blue-600 hover:text-blue-700 font-medium mr-3">編集</a>
+									<button
+										on:click={() => openCopyModal(template)}
 										class="text-green-600 hover:text-green-700 font-medium mr-3"
 									>
 										コピー
 									</button>
 									<button
-										on:click={() => openDeleteModal(content)}
+										on:click={() => openDeleteModal(template)}
 										class="text-red-600 hover:text-red-700 font-medium"
 									>
 										削除
@@ -412,8 +464,8 @@
 							</tr>
 						{:else}
 							<tr>
-								<td colspan="6" class="px-6 py-12 text-center text-gray-500">
-									コンテンツがまだありません。「新規コンテンツ作成」から追加してください。
+								<td colspan="5" class="px-6 py-12 text-center text-gray-500">
+									テンプレートがまだありません。「新規テンプレート作成」から追加してください。
 								</td>
 							</tr>
 						{/each}
@@ -423,12 +475,12 @@
 		</div>
 		{/if}
 
-		<!-- 全企業のコンテンツ -->
+		<!-- 全企業のテンプレート -->
 		{#if activeTab === 'all'}
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200">
 			<div class="px-6 py-4 border-b border-gray-200">
 				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-					<h2 class="text-lg font-semibold text-gray-900">全企業のコンテンツ一覧</h2>
+					<h2 class="text-lg font-semibold text-gray-900">全企業のテンプレート一覧</h2>
 					<div class="flex flex-col sm:flex-row gap-3">
 						<!-- 検索ボックス -->
 						<div class="relative">
@@ -438,7 +490,7 @@
 							<input
 								type="text"
 								bind:value={searchQuery}
-								placeholder="タイトル、カテゴリ、企業名で検索..."
+								placeholder="タイトル、件名、企業名で検索..."
 								class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full sm:w-64"
 							/>
 						</div>
@@ -495,17 +547,6 @@
 							</th>
 							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 								<button
-									on:click={() => toggleAllSort('type')}
-									class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
-								>
-									<span>種類</span>
-									{#if allSortBy === 'type'}
-										<span class="text-indigo-600">{allSortOrder === 'asc' ? '▲' : '▼'}</span>
-									{/if}
-								</button>
-							</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								<button
 									on:click={() => toggleAllSort('created_at')}
 									class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
 								>
@@ -519,44 +560,47 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-200">
-						{#each filteredAllContents as content}
+						{#each filteredAllTemplates as template}
 							<tr class="hover:bg-gray-50">
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm font-medium text-gray-900">{content.company_name}</div>
-									<div class="text-xs text-gray-500">{content.company_code}</div>
+									<div class="text-sm font-medium text-gray-900">{template.company_name}</div>
+									<div class="text-xs text-gray-500">{template.company_code}</div>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
 									<div class="text-sm font-bold text-gray-900 bg-indigo-100 rounded-full w-8 h-8 flex items-center justify-center">
-										{content.number}
+										{template.number}
 									</div>
 								</td>
 								<td class="px-4 py-4">
-									<div class="text-sm font-medium text-gray-900">{content.title}</div>
-									{#if content.description}
-										<div class="text-xs text-gray-500 mt-1 line-clamp-2">{content.description}</div>
+									<div class="text-sm font-medium text-gray-900">{template.title}</div>
+									{#if template.subject}
+										<div class="text-xs text-gray-500 mt-1 line-clamp-2">件名: {template.subject}</div>
 									{/if}
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm text-gray-600">{content.category || '-'}</div>
-								</td>
-								<td class="px-4 py-4 whitespace-nowrap">
-									<span class="px-2 py-1 text-xs font-medium rounded-full {getTypeBadgeClass(content.content_type)}">
-										{content.content_type === 'video' ? '動画' : 'テキスト'}
+									<span class="px-2 py-1 text-xs font-medium rounded-full {getCategoryBadgeClass(template.category || '')}">
+										{getCategoryLabel(template.category || '')}
 									</span>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="text-sm text-gray-600">{formatDate(content.created_at)}</div>
+									<div class="text-sm text-gray-600">{formatDate(template.created_at)}</div>
 								</td>
 								<td class="px-4 py-4 whitespace-nowrap text-sm">
-									<a href="/admin/company-contents/{content.target_company_id}/edit/{content.id}" class="text-indigo-600 hover:text-indigo-700 font-medium mr-3">編集</a>
 									<button
-										on:click={() => openCopyModal(content)}
+										on:click={() => openDetailModal(template)}
+										class="text-indigo-600 hover:text-indigo-700 font-medium mr-3"
+									>
+										詳細
+									</button>
+									<a href="/admin/company-templates/{template.target_company_id}/edit/{template.id}" class="text-blue-600 hover:text-blue-700 font-medium mr-3">編集</a>
+									<button
+										on:click={() => openCopyModal(template)}
 										class="text-green-600 hover:text-green-700 font-medium mr-3"
 									>
 										コピー
 									</button>
 									<button
-										on:click={() => openDeleteModal(content)}
+										on:click={() => openDeleteModal(template)}
 										class="text-red-600 hover:text-red-700 font-medium"
 									>
 										削除
@@ -565,11 +609,11 @@
 							</tr>
 						{:else}
 							<tr>
-								<td colspan="7" class="px-6 py-12 text-center text-gray-500">
+								<td colspan="6" class="px-6 py-12 text-center text-gray-500">
 									{#if searchQuery || filterCompanyId !== null}
-										検索条件に一致するコンテンツがありません。
+										検索条件に一致するテンプレートがありません。
 									{:else}
-										企業専用コンテンツがまだありません。
+										企業専用テンプレートがまだありません。
 									{/if}
 								</td>
 							</tr>
@@ -577,12 +621,12 @@
 					</tbody>
 				</table>
 			</div>
-			{#if filteredAllContents.length > 0}
+			{#if filteredAllTemplates.length > 0}
 			<div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
 				<p class="text-sm text-gray-600">
-					{filteredAllContents.length}件のコンテンツを表示中
+					{filteredAllTemplates.length}件のテンプレートを表示中
 					{#if searchQuery || filterCompanyId !== null}
-						（全{(data.allContents || []).length}件中）
+						（全{(data.allTemplates || []).length}件中）
 					{/if}
 				</p>
 			</div>
@@ -591,8 +635,188 @@
 		{/if}
 	</div>
 
+	<!-- 新規作成モーダル -->
+	{#if showCreateModal}
+		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+				<div class="p-6 border-b border-gray-200">
+					<h2 class="text-xl font-bold text-gray-900">新規テンプレート作成</h2>
+					<p class="text-sm text-gray-500 mt-1">{data.company.company_name}専用</p>
+				</div>
+
+				<form method="POST" action="?/createTemplate" use:enhance class="flex-1 overflow-y-auto">
+					<div class="p-6 space-y-4">
+						<div>
+							<label for="create-title" class="block text-sm font-medium text-gray-700 mb-1">
+								タイトル <span class="text-red-500">*</span>
+							</label>
+							<input
+								id="create-title"
+								type="text"
+								name="title"
+								bind:value={createTitle}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+								placeholder="例: ログイン案内メール"
+							/>
+						</div>
+
+						<div>
+							<label for="create-category" class="block text-sm font-medium text-gray-700 mb-1">カテゴリ</label>
+							<select
+								id="create-category"
+								name="category"
+								bind:value={createCategory}
+								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+							>
+								<option value="login">ログイン案内</option>
+								<option value="reminder">リマインダー</option>
+								<option value="notification">お知らせ</option>
+								<option value="other">その他</option>
+							</select>
+						</div>
+
+						<div>
+							<label for="create-subject" class="block text-sm font-medium text-gray-700 mb-1">メール件名</label>
+							<input
+								id="create-subject"
+								type="text"
+								name="subject"
+								bind:value={createSubject}
+								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+								placeholder="例: 【WEBTHQAcademy】ログイン情報のお知らせ"
+							/>
+						</div>
+
+						<div>
+							<label for="create-body" class="block text-sm font-medium text-gray-700 mb-1">
+								本文 <span class="text-red-500">*</span>
+							</label>
+							<textarea
+								id="create-body"
+								name="body"
+								bind:value={createBody}
+								required
+								rows="10"
+								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
+								placeholder="テンプレート本文を入力..."
+							></textarea>
+							<p class="text-xs text-gray-500 mt-1">
+								変数: {'{{名前}}'}, {'{{ログインID}}'}, {'{{パスワード}}'}, {'{{ログインURL}}'}, {'{{企業名}}'}
+							</p>
+						</div>
+
+						<div>
+							<label for="create-description" class="block text-sm font-medium text-gray-700 mb-1">説明（管理用メモ）</label>
+							<textarea
+								id="create-description"
+								name="description"
+								bind:value={createDescription}
+								rows="2"
+								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+								placeholder="このテンプレートの用途や注意点など..."
+							></textarea>
+						</div>
+					</div>
+
+					<div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
+						<button
+							type="button"
+							on:click={closeModals}
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+						>
+							キャンセル
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+						>
+							作成
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{/if}
+
+	<!-- 詳細モーダル -->
+	{#if showDetailModal && selectedTemplate}
+		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+				<div class="p-6 border-b border-gray-200">
+					<div class="flex items-center justify-between">
+						<div>
+							<h2 class="text-xl font-bold text-gray-900">{selectedTemplate.title}</h2>
+							<p class="text-sm text-gray-500 mt-1">{selectedTemplate.company_name || data.company.company_name}</p>
+						</div>
+						<span class="px-2 py-1 text-xs font-medium rounded-full {getCategoryBadgeClass(selectedTemplate.category || '')}">
+							{getCategoryLabel(selectedTemplate.category || '')}
+						</span>
+					</div>
+				</div>
+
+				<div class="flex-1 overflow-y-auto p-6 space-y-4">
+					{#if selectedTemplate.subject}
+						<div>
+							<p class="block text-sm font-medium text-gray-700 mb-1">件名</p>
+							<div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+								{selectedTemplate.subject}
+							</div>
+						</div>
+					{/if}
+
+					<div>
+						<p class="block text-sm font-medium text-gray-700 mb-1">本文</p>
+						<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 whitespace-pre-wrap text-sm">
+							{selectedTemplate.body}
+						</div>
+					</div>
+
+					{#if selectedTemplate.description}
+						<div>
+							<p class="block text-sm font-medium text-gray-700 mb-1">説明</p>
+							<div class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm text-gray-600">
+								{selectedTemplate.description}
+							</div>
+						</div>
+					{/if}
+				</div>
+
+				<div class="p-4 border-t border-gray-200 bg-gray-50">
+					<div class="flex flex-wrap gap-3">
+						<button
+							on:click={() => copyToClipboard(selectedTemplate.body)}
+							class="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+						>
+							{#if copySuccess}
+								<div class="w-4 h-4 mr-2">{@html getIconSVG('check')}</div>
+								<span>コピーしました</span>
+							{:else}
+								<div class="w-4 h-4 mr-2">{@html getIconSVG('copy')}</div>
+								<span>本文をコピー</span>
+							{/if}
+						</button>
+						<button
+							on:click={openMailClient}
+							class="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+						>
+							<div class="w-4 h-4 mr-2">{@html getIconSVG('mail')}</div>
+							<span>メールで開く</span>
+						</button>
+						<button
+							on:click={closeModals}
+							class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors ml-auto"
+						>
+							閉じる
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	<!-- 削除確認モーダル -->
-	{#if showDeleteModal && selectedContent}
+	{#if showDeleteModal && selectedTemplate}
 		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
 			<div class="bg-white rounded-lg shadow-xl max-w-md w-full">
 				<div class="p-6">
@@ -601,14 +825,14 @@
 							{@html getIconSVG('trash')}
 						</div>
 					</div>
-					<h2 class="text-xl font-bold text-gray-900 text-center mb-2">コンテンツを削除</h2>
+					<h2 class="text-xl font-bold text-gray-900 text-center mb-2">テンプレートを削除</h2>
 					<p class="text-gray-600 text-center mb-6">
-						「{selectedContent.title}」を削除してもよろしいですか?<br />
+						「{selectedTemplate.title}」を削除してもよろしいですか?<br />
 						この操作は取り消せません。
 					</p>
 
-					<form method="POST" action="?/deleteContent" use:enhance class="space-y-3">
-						<input type="hidden" name="id" value={selectedContent.id} />
+					<form method="POST" action="?/deleteTemplate" use:enhance class="space-y-3">
+						<input type="hidden" name="templateId" value={selectedTemplate.id} />
 						<div class="flex items-center space-x-3">
 							<button
 								type="button"
@@ -631,7 +855,7 @@
 	{/if}
 
 	<!-- コピーモーダル -->
-	{#if showCopyModal && selectedContent}
+	{#if showCopyModal && selectedTemplate}
 		<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
 			<div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
 				<div class="p-6 border-b border-gray-200">
@@ -642,7 +866,7 @@
 					</div>
 					<h2 class="text-xl font-bold text-gray-900 text-center mb-2">他の企業にコピー</h2>
 					<p class="text-gray-600 text-center text-sm">
-						「{selectedContent.title}」をコピーする企業を選択してください
+						「{selectedTemplate.title}」をコピーする企業を選択してください
 					</p>
 				</div>
 
@@ -698,8 +922,8 @@
 				</div>
 
 				<div class="p-4 border-t border-gray-200 bg-gray-50">
-					<form method="POST" action="?/copyContent" use:enhance class="space-y-3">
-						<input type="hidden" name="contentId" value={selectedContent.id} />
+					<form method="POST" action="?/copyTemplate" use:enhance class="space-y-3">
+						<input type="hidden" name="templateId" value={selectedTemplate.id} />
 						{#each selectedCompanyIds as companyId}
 							<input type="hidden" name="targetCompanyIds" value={companyId} />
 						{/each}

@@ -62,14 +62,26 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		use_unified_id: row.use_unified_id as number
 	}));
 
-	// 全コンテンツを取得
-	const contentsResult = await db.execute({
+	// 共有コンテンツを取得（is_company_specific = 0 または NULL）
+	const sharedContentsResult = await db.execute({
 		sql: `
 			SELECT id, title, category, created_at
 			FROM contents
+			WHERE is_company_specific = 0 OR is_company_specific IS NULL
 			ORDER BY created_at DESC
 		`,
 		args: []
+	});
+
+	// この企業専用のコンテンツを取得
+	const companyContentsResult = await db.execute({
+		sql: `
+			SELECT id, title, category, created_at
+			FROM contents
+			WHERE is_company_specific = 1 AND target_company_id = ?
+			ORDER BY created_at DESC
+		`,
+		args: [parseInt(companyId)]
 	});
 
 	// この企業が閲覧許可を持っているコンテンツIDと表示順序、編集権限を取得
@@ -90,7 +102,17 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		permissionsResult.rows.map(row => [row.content_id as number, (row.can_edit as number) === 1])
 	);
 
-	const contents = contentsResult.rows.map((row) => ({
+	const sharedContents = sharedContentsResult.rows.map((row) => ({
+		id: row.id as number,
+		title: row.title as string,
+		category: row.category as string | null,
+		created_at: row.created_at as string,
+		permitted: permittedContentIds.has(row.id as number),
+		display_order: contentDisplayOrders.get(row.id as number) || 0,
+		can_edit: contentEditPermissions.get(row.id as number) || false
+	}));
+
+	const companyContents = companyContentsResult.rows.map((row) => ({
 		id: row.id as number,
 		title: row.title as string,
 		category: row.category as string | null,
@@ -105,7 +127,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		company,
 		staff,
 		students,
-		contents
+		sharedContents,
+		companyContents
 	};
 };
 

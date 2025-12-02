@@ -17,6 +17,7 @@
 	let studentName = '';
 
 	// 編集フォーム入力
+	let editLoginId = '';
 	let editPassword = '';
 
 	// フィルター
@@ -30,6 +31,7 @@
 		selectedCompanyId = '';
 		employeeNumber = '';
 		studentName = '';
+		editLoginId = '';
 		editPassword = '';
 	}
 
@@ -52,6 +54,7 @@
 
 	function openEditModal(student: any) {
 		selectedStudent = student;
+		editLoginId = student.login_id;  // 現在のユーザーIDをセット
 		editPassword = '';  // パスワードは空にする
 		showEditModal = true;
 	}
@@ -66,6 +69,7 @@
 		showDeleteModal = false;
 		showEditModal = false;
 		selectedStudent = null;
+		editLoginId = '';
 		editPassword = '';
 	}
 
@@ -362,30 +366,45 @@
 						<p class="text-sm text-gray-700 mb-1">
 							<span class="font-medium">名前:</span> {selectedStudent.name}
 						</p>
-						<p class="text-sm text-gray-700 mb-1">
-							<span class="font-medium">ユーザーID:</span> {selectedStudent.login_id}
-						</p>
 						<p class="text-sm text-gray-700">
 							<span class="font-medium">所属企業:</span> {selectedStudent.company_name || '-'}
+						</p>
+					</div>
+
+					<!-- ユーザーID変更 -->
+					<div>
+						<label for="edit_login_id" class="block text-sm font-medium text-gray-700 mb-2">
+							ユーザーID <span class="text-red-500">*</span>
+						</label>
+						<input
+							type="text"
+							id="edit_login_id"
+							name="login_id"
+							bind:value={editLoginId}
+							required
+							placeholder="ユーザーIDを入力"
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+						/>
+						<p class="mt-1 text-sm text-gray-500">
+							生徒がログインする際に使用するIDです
 						</p>
 					</div>
 
 					<!-- パスワード変更 -->
 					<div>
 						<label for="edit_password" class="block text-sm font-medium text-gray-700 mb-2">
-							新しいパスワード <span class="text-red-500">*</span>
+							新しいパスワード <span class="text-gray-400 text-xs font-normal">（変更する場合のみ入力）</span>
 						</label>
 						<input
 							type="password"
 							id="edit_password"
 							name="password"
 							bind:value={editPassword}
-							required
-							placeholder="新しいパスワードを入力"
+							placeholder="新しいパスワードを入力（空欄でIDのみ変更）"
 							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
 						/>
 						<p class="mt-1 text-sm text-gray-500">
-							統一ID「{selectedStudent.login_id}」のパスワードを変更します
+							空欄の場合、パスワードは変更されません
 						</p>
 					</div>
 				</div>

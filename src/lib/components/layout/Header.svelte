@@ -40,13 +40,38 @@
 				return 'text-gray-500';
 		}
 	}
+
+	function getDashboardUrl(role: string | undefined): string {
+		switch (role) {
+			case 'master':
+				return '/admin/dashboard';
+			case 'company_admin':
+				return '/company/dashboard';
+			case 'user':
+				return '/user/dashboard';
+			default:
+				return '/';
+		}
+	}
 </script>
 
 <header class="bg-white shadow-sm border-b border-gray-200">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
-			<!-- ロゴ -->
-			<div class="flex items-center">
+			<!-- ロゴとホームアイコン -->
+			<div class="flex items-center space-x-3">
+				{#if user}
+					<a
+						href={getDashboardUrl(user.role)}
+						class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+						title="ダッシュボードへ"
+					>
+						<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+							<polyline points="9 22 9 12 15 12 15 22"/>
+						</svg>
+					</a>
+				{/if}
 				<h1 class="text-xl font-bold text-gray-800">WEBTHQAcademy</h1>
 			</div>
 

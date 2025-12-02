@@ -55,7 +55,10 @@
       "Bash(wrangler pages deploy:*)",
       "Bash(del:*)",
       "Bash(cat:*)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(CLOUDFLARE_ACCOUNT_ID=bde867b9de4420c93bdc797d254ea437 npx wrangler pages deploy:*)",
+      "Bash(set:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

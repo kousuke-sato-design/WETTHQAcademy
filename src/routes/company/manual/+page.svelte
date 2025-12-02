@@ -33,10 +33,11 @@
 			<ul class="space-y-2">
 				<li><a href="#overview" class="text-blue-600 hover:underline">1. システム概要</a></li>
 				<li><a href="#login" class="text-blue-600 hover:underline">2. ログイン方法</a></li>
-				<li><a href="#contents" class="text-blue-600 hover:underline">3. コンテンツ管理</a></li>
-				<li><a href="#students" class="text-blue-600 hover:underline">4. 生徒管理</a></li>
-				<li><a href="#staff" class="text-blue-600 hover:underline">5. 担当者管理</a></li>
-				<li><a href="#editor" class="text-blue-600 hover:underline">6. リッチテキストエディタの使い方</a></li>
+				<li><a href="#contents" class="text-blue-600 hover:underline">3. コンテンツ閲覧</a></li>
+				<li><a href="#company-contents" class="text-blue-600 hover:underline">4. 企業専用コンテンツ管理</a></li>
+				<li><a href="#students" class="text-blue-600 hover:underline">5. 生徒管理</a></li>
+				<li><a href="#staff" class="text-blue-600 hover:underline">6. 担当者管理</a></li>
+				<li><a href="#editor" class="text-blue-600 hover:underline">7. リッチテキストエディタの使い方</a></li>
 			</ul>
 		</nav>
 
@@ -50,10 +51,10 @@
 				<div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4">
 					<h3 class="font-bold text-blue-900 mb-2">主な機能</h3>
 					<ul class="list-disc list-inside space-y-1 text-blue-900">
-						<li>コンテンツの作成・編集・削除（管理者と同等の権限）</li>
+						<li>受講可能なコンテンツの閲覧</li>
+						<li><strong>企業専用コンテンツの作成・編集・削除</strong></li>
 						<li>自社生徒の一覧・登録・編集・削除</li>
 						<li>自社担当者の一覧・登録・編集・削除</li>
-						<li>受講可能なコンテンツの確認</li>
 						<li>動画のアップロード・管理（最大100MB）</li>
 					</ul>
 				</div>
@@ -100,20 +101,38 @@
 				</div>
 			</section>
 
-			<!-- 3. コンテンツ管理 -->
+			<!-- 3. コンテンツ閲覧 -->
 			<section id="contents" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">3. コンテンツ管理</h2>
-
-				<div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-					<h3 class="font-bold text-green-900 mb-2">✅ 企業担当者は管理者と同等の編集権限を持ちます</h3>
-					<p class="text-green-900">コンテンツの作成、編集、削除が可能です。マスター管理者と同じ機能を使用できます。</p>
-				</div>
+				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">3. コンテンツ閲覧</h2>
 
 				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">3.1 コンテンツ一覧</h3>
 				<p class="mb-4">URL: <code class="bg-gray-200 px-2 py-1 rounded text-sm">/company/contents</code></p>
-				<p class="mb-4">自社が閲覧可能なコンテンツと、全てのコンテンツを確認できます。</p>
+				<p class="mb-4">自社が閲覧可能なコンテンツを確認できます。管理者が許可したコンテンツのみ表示されます。</p>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">3.2 新規コンテンツ作成</h3>
+				<div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+					<h4 class="font-bold text-blue-900 mb-2">コンテンツの種類</h4>
+					<ul class="list-disc list-inside space-y-1 text-blue-900">
+						<li><strong>共通コンテンツ</strong>: 管理者が作成し、許可された全企業が閲覧可能</li>
+						<li><strong>企業専用コンテンツ</strong>: 自社専用に作成されたオリジナルコンテンツ</li>
+					</ul>
+				</div>
+
+				<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+					<p class="text-yellow-900"><strong>💡 ヒント:</strong> コンテンツをクリックすると詳細ページで閲覧できます。動画やテキスト、添付ファイルなど様々な形式のコンテンツがあります。</p>
+				</div>
+			</section>
+
+			<!-- 4. 企業専用コンテンツ管理 -->
+			<section id="company-contents" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">4. 企業専用コンテンツ管理</h2>
+				<p class="mb-4">URL: <code class="bg-gray-200 px-2 py-1 rounded text-sm">/company/company-contents</code></p>
+
+				<div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+					<h3 class="font-bold text-green-900 mb-2">✅ 企業専用コンテンツとは</h3>
+					<p class="text-green-900">自社専用のオリジナルコンテンツを作成・編集できます。作成したコンテンツは自社の生徒のみが閲覧できます。</p>
+				</div>
+
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">4.1 新規コンテンツ作成</h3>
 				<div class="space-y-3">
 					<p class="font-semibold">基本情報を入力：</p>
 					<ul class="list-disc list-inside ml-4 space-y-1">
@@ -140,17 +159,20 @@
 						<li><strong>プログレスバー</strong>: アップロード進行状況を表示</li>
 					</ul>
 				</div>
+
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">4.2 コンテンツの編集</h3>
+				<p class="mb-4">作成したコンテンツは後から編集できます。一覧から編集したいコンテンツをクリックして、内容を更新してください。</p>
 			</section>
 
-			<!-- 4. 生徒管理 -->
+			<!-- 5. 生徒管理 -->
 			<section id="students" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">4. 生徒管理</h2>
+				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">5. 生徒管理</h2>
 				<p class="mb-4">URL: <code class="bg-gray-200 px-2 py-1 rounded text-sm">/company/users</code></p>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">4.1 生徒一覧</h3>
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">5.1 生徒一覧</h3>
 				<p class="mb-4">自社に所属する生徒の一覧を確認できます。各生徒の情報を編集・削除することも可能です。</p>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">4.2 新規生徒登録</h3>
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">5.2 新規生徒登録</h3>
 				<ul class="list-disc list-inside ml-4 space-y-1">
 					<li>ログインID（必須）</li>
 					<li>パスワード（必須）</li>
@@ -162,15 +184,15 @@
 				</div>
 			</section>
 
-			<!-- 5. 担当者管理 -->
+			<!-- 6. 担当者管理 -->
 			<section id="staff" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">5. 担当者管理</h2>
+				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">6. 担当者管理</h2>
 				<p class="mb-4">URL: <code class="bg-gray-200 px-2 py-1 rounded text-sm">/company/staff</code></p>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">5.1 担当者一覧</h3>
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">6.1 担当者一覧</h3>
 				<p class="mb-4">自社の企業担当者の一覧を確認できます。各担当者の情報を編集・削除することも可能です。</p>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">5.2 新規担当者登録</h3>
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">6.2 新規担当者登録</h3>
 				<ul class="list-disc list-inside ml-4 space-y-1">
 					<li>ログインID（必須）</li>
 					<li>パスワード（必須）</li>
@@ -188,9 +210,9 @@
 				</div>
 			</section>
 
-			<!-- 6. リッチテキストエディタの使い方 -->
+			<!-- 7. リッチテキストエディタの使い方 -->
 			<section id="editor" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">6. リッチテキストエディタの使い方</h2>
+				<h2 class="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-3 mb-4">7. リッチテキストエディタの使い方</h2>
 
 				<div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
 					<h3 class="font-bold text-blue-900 mb-2">2つのモード</h3>
@@ -200,7 +222,7 @@
 					</ul>
 				</div>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">6.1 基本的な使い方</h3>
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">7.1 基本的な使い方</h3>
 				<div class="space-y-3">
 					<div class="bg-gray-50 border-l-4 border-pink-500 p-4">
 						<strong class="block mb-1">📝 テキスト装飾</strong>
@@ -236,7 +258,7 @@
 					</div>
 				</div>
 
-				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">6.2 HTMLモードの使い方</h3>
+				<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">7.2 HTMLモードの使い方</h3>
 				<p class="mb-4">より高度なカスタマイズが必要な場合は、HTMLモードに切り替えてください。</p>
 				<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
 					<p class="text-yellow-900"><strong>⚠️ 注意:</strong> HTMLモードでは不正なタグを入力すると表示が崩れる可能性があります。基本的にはビジュアルモードの使用をおすすめします。</p>
@@ -248,6 +270,37 @@
 		<div class="mt-12 bg-green-50 border-l-4 border-green-500 p-6 rounded no-print">
 			<h3 class="font-bold text-green-900 mb-2">📞 サポート</h3>
 			<p class="text-green-900">ご不明な点がございましたら、システム管理者までお問い合わせください。</p>
+		</div>
+
+		<!-- バージョン履歴 -->
+		<div class="mt-8 bg-gray-100 border border-gray-300 p-6 rounded">
+			<h3 class="font-bold text-gray-700 mb-3">📋 更新履歴</h3>
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-gray-300">
+						<th class="text-left py-2 pr-4 text-gray-600">バージョン</th>
+						<th class="text-left py-2 pr-4 text-gray-600">更新日</th>
+						<th class="text-left py-2 text-gray-600">更新内容</th>
+					</tr>
+				</thead>
+				<tbody class="text-gray-700">
+					<tr class="border-b border-gray-200">
+						<td class="py-2 pr-4 font-medium">v1.2.0</td>
+						<td class="py-2 pr-4">2024/12/02</td>
+						<td class="py-2">企業専用コンテンツ管理セクションを追加、コンテンツ閲覧セクションを分離</td>
+					</tr>
+					<tr class="border-b border-gray-200">
+						<td class="py-2 pr-4 font-medium">v1.1.0</td>
+						<td class="py-2 pr-4">2024/11/15</td>
+						<td class="py-2">リッチテキストエディタの使い方を追加</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-4 font-medium">v1.0.0</td>
+						<td class="py-2 pr-4">2024/10/01</td>
+						<td class="py-2">初版作成</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
 		<!-- 戻るボタン -->

@@ -9,6 +9,30 @@
 
 	// タブの状態管理
 	let activeTab: 'company' | 'staff' | 'students' | 'contents' = 'company';
+	// コンテンツのサブタブ
+	let contentSubTab: 'shared' | 'company' = 'shared';
+
+	// コンテンツの許可状態をローカルで管理（編集可能にするため）
+	type ContentPermission = {
+		id: number;
+		title: string;
+		category: string | null;
+		created_at: string;
+		permitted: boolean;
+		display_order: number;
+		can_edit: boolean;
+	};
+
+	let localSharedContents: ContentPermission[] = [];
+	let localCompanyContents: ContentPermission[] = [];
+
+	// データが変更されたらローカル状態を初期化
+	$: if (data.sharedContents) {
+		localSharedContents = data.sharedContents.map(c => ({ ...c }));
+	}
+	$: if (data.companyContents) {
+		localCompanyContents = data.companyContents.map(c => ({ ...c }));
+	}
 
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
@@ -140,7 +164,7 @@
 						</svg>
 						<span>受講コンテンツ</span>
 						<span class="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
-							{data.contents?.filter(c => c.permitted).length || 0}
+							{localSharedContents.filter(c => c.permitted).length + localCompanyContents.filter(c => c.permitted).length}
 						</span>
 					</div>
 				</button>
@@ -312,10 +336,52 @@
 		{:else if activeTab === 'contents'}
 		<!-- コンテンツ受講許可 -->
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-			<h2 class="text-xl font-bold text-gray-900 mb-6">受講許可設定</h2>
+			<h2 class="text-xl font-bold text-gray-900 mb-4">受講許可設定</h2>
 			<p class="text-gray-600 mb-6">
 				この企業の生徒が閲覧できるコンテンツを選択してください
 			</p>
+
+			<!-- サブタブ -->
+			<div class="mb-6 border-b border-gray-200">
+				<nav class="flex space-x-6">
+					<button
+						type="button"
+						on:click={() => (contentSubTab = 'shared')}
+						class="py-3 px-1 border-b-2 font-medium text-sm transition-colors {contentSubTab === 'shared'
+							? 'border-blue-500 text-blue-600'
+							: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+					>
+						<div class="flex items-center space-x-2">
+							<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+								<polyline points="14 2 14 8 20 8"/>
+							</svg>
+							<span>共有コンテンツ</span>
+							<span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+								{localSharedContents.length}
+							</span>
+						</div>
+					</button>
+					<button
+						type="button"
+						on:click={() => (contentSubTab = 'company')}
+						class="py-3 px-1 border-b-2 font-medium text-sm transition-colors {contentSubTab === 'company'
+							? 'border-purple-500 text-purple-600'
+							: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+					>
+						<div class="flex items-center space-x-2">
+							<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+								<path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+							</svg>
+							<span>企業専用コンテンツ</span>
+							<span class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+								{localCompanyContents.length}
+							</span>
+						</div>
+					</button>
+				</nav>
+			</div>
 
 			<form method="POST" action="?/updatePermissions" use:enhance={() => {
 			return async ({ result, update }) => {
@@ -325,82 +391,194 @@
 				await update({ reset: false });
 			};
 		}}>
-				{#if !data.contents || data.contents.length === 0}
-					<div class="text-center py-12 bg-gray-50 rounded-lg">
-						<p class="text-gray-500">コンテンツが登録されていません</p>
-					</div>
-				{:else}
-					<div class="space-y-3 mb-6">
-						{#each data.contents as content}
-							<div class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-								<label class="flex items-start flex-1 cursor-pointer">
-									<input
-										type="checkbox"
-										name="content_ids[]"
-										value={content.id}
-										checked={content.permitted}
-										class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-									/>
-									<div class="ml-3 flex-1">
-										<div class="flex items-center justify-between">
-											<h3 class="font-medium text-gray-900">{content.title}</h3>
-											{#if content.permitted}
-												<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
-													許可済み
-												</span>
-											{/if}
-										</div>
-										{#if content.category}
-											<p class="text-sm text-gray-600 mt-1">
-												カテゴリ: {content.category}
-											</p>
-										{/if}
-										<p class="text-xs text-gray-500 mt-1">
-											作成日: {new Date(content.created_at).toLocaleDateString('ja-JP')}
-										</p>
-									</div>
-								</label>
-								<div class="ml-4 flex items-center space-x-4">
-									<div class="flex items-center space-x-2">
-										<label for="display_order_{content.id}" class="text-sm font-medium text-gray-700 whitespace-nowrap">
-											表示順序:
-										</label>
-										<input
-											type="number"
-											id="display_order_{content.id}"
-											name="display_order_{content.id}"
-											value={content.display_order || 0}
-											min="0"
-											class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-											placeholder="0"
-										/>
-									</div>
-									<label class="flex items-center space-x-2 cursor-pointer">
+				<!-- 両方のコンテンツをhiddenで送信 -->
+				{#each localSharedContents as content}
+					{#if content.permitted}
+						<input type="hidden" name="content_ids[]" value={content.id} />
+						<input type="hidden" name="display_order_{content.id}" value={content.display_order} />
+						{#if content.can_edit}
+							<input type="hidden" name="can_edit_{content.id}" value="on" />
+						{/if}
+					{/if}
+				{/each}
+				{#each localCompanyContents as content}
+					{#if content.permitted}
+						<input type="hidden" name="content_ids[]" value={content.id} />
+						<input type="hidden" name="display_order_{content.id}" value={content.display_order} />
+						{#if content.can_edit}
+							<input type="hidden" name="can_edit_{content.id}" value="on" />
+						{/if}
+					{/if}
+				{/each}
+
+				<!-- 共有コンテンツ -->
+				{#if contentSubTab === 'shared'}
+					{#if localSharedContents.length === 0}
+						<div class="text-center py-12 bg-gray-50 rounded-lg">
+							<p class="text-gray-500">共有コンテンツが登録されていません</p>
+						</div>
+					{:else}
+						<div class="space-y-3 mb-6">
+							{#each localSharedContents as content, index}
+								<div class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+									<label class="flex items-start flex-1 cursor-pointer">
 										<input
 											type="checkbox"
-											name="can_edit_{content.id}"
-											checked={content.can_edit}
-											class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+											bind:checked={localSharedContents[index].permitted}
+											class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
 										/>
-										<span class="text-sm font-medium text-gray-700 whitespace-nowrap">担当者編集可能</span>
+										<div class="ml-3 flex-1">
+											<div class="flex items-center justify-between">
+												<h3 class="font-medium text-gray-900">{content.title}</h3>
+												{#if content.permitted}
+													<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+														許可済み
+													</span>
+												{/if}
+											</div>
+											{#if content.category}
+												<p class="text-sm text-gray-600 mt-1">
+													カテゴリ: {content.category}
+												</p>
+											{/if}
+											<p class="text-xs text-gray-500 mt-1">
+												作成日: {new Date(content.created_at).toLocaleDateString('ja-JP')}
+											</p>
+										</div>
 									</label>
+									<div class="ml-4 flex items-center space-x-4">
+										<div class="flex items-center space-x-2">
+											<span class="text-sm font-medium text-gray-700 whitespace-nowrap">表示順序:</span>
+											<input
+												type="number"
+												bind:value={localSharedContents[index].display_order}
+												min="0"
+												class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+												placeholder="0"
+											/>
+										</div>
+										<label class="flex items-center space-x-2 cursor-pointer">
+											<input
+												type="checkbox"
+												bind:checked={localSharedContents[index].can_edit}
+												class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+											/>
+											<span class="text-sm font-medium text-gray-700 whitespace-nowrap">担当者編集可能</span>
+										</label>
+									</div>
 								</div>
-							</div>
-						{/each}
-					</div>
-
-					<div class="flex justify-end">
-						<button
-							type="submit"
-							class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg inline-flex items-center transition-colors"
-						>
-							<div class="w-4 h-4 mr-2">
-								{@html getIconSVG('save')}
-							</div>
-							受講許可を更新
-						</button>
-					</div>
+							{/each}
+						</div>
+					{/if}
 				{/if}
+
+				<!-- 企業専用コンテンツ -->
+				{#if contentSubTab === 'company'}
+					{#if localCompanyContents.length === 0}
+						<div class="text-center py-12 bg-gray-50 rounded-lg">
+							<div class="mb-4">
+								<svg class="w-12 h-12 text-gray-400 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+									<path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+								</svg>
+							</div>
+							<p class="text-gray-500 mb-4">この企業専用のコンテンツがありません</p>
+							<a
+								href="/admin/company-contents/{data.company.id}"
+								class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+							>
+								<svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="12" y1="5" x2="12" y2="19"/>
+									<line x1="5" y1="12" x2="19" y2="12"/>
+								</svg>
+								企業専用コンテンツを作成
+							</a>
+						</div>
+					{:else}
+						<div class="space-y-3 mb-6">
+							{#each localCompanyContents as content, index}
+								<div class="flex items-start p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors bg-purple-50/30">
+									<label class="flex items-start flex-1 cursor-pointer">
+										<input
+											type="checkbox"
+											bind:checked={localCompanyContents[index].permitted}
+											class="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+										/>
+										<div class="ml-3 flex-1">
+											<div class="flex items-center justify-between">
+												<div class="flex items-center space-x-2">
+													<h3 class="font-medium text-gray-900">{content.title}</h3>
+													<span class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">
+														専用
+													</span>
+												</div>
+												{#if content.permitted}
+													<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+														許可済み
+													</span>
+												{/if}
+											</div>
+											{#if content.category}
+												<p class="text-sm text-gray-600 mt-1">
+													カテゴリ: {content.category}
+												</p>
+											{/if}
+											<p class="text-xs text-gray-500 mt-1">
+												作成日: {new Date(content.created_at).toLocaleDateString('ja-JP')}
+											</p>
+										</div>
+									</label>
+									<div class="ml-4 flex items-center space-x-4">
+										<div class="flex items-center space-x-2">
+											<span class="text-sm font-medium text-gray-700 whitespace-nowrap">表示順序:</span>
+											<input
+												type="number"
+												bind:value={localCompanyContents[index].display_order}
+												min="0"
+												class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+												placeholder="0"
+											/>
+										</div>
+										<label class="flex items-center space-x-2 cursor-pointer">
+											<input
+												type="checkbox"
+												bind:checked={localCompanyContents[index].can_edit}
+												class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+											/>
+											<span class="text-sm font-medium text-gray-700 whitespace-nowrap">担当者編集可能</span>
+										</label>
+									</div>
+								</div>
+							{/each}
+						</div>
+
+						<div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+							<a
+								href="/admin/company-contents/{data.company.id}"
+								class="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium"
+							>
+								<svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+									<polyline points="15 3 21 3 21 9"/>
+									<line x1="10" y1="14" x2="21" y2="3"/>
+								</svg>
+								企業専用コンテンツ管理ページへ
+							</a>
+						</div>
+					{/if}
+				{/if}
+
+				<div class="flex justify-end">
+					<button
+						type="submit"
+						class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg inline-flex items-center transition-colors"
+					>
+						<div class="w-4 h-4 mr-2">
+							{@html getIconSVG('save')}
+						</div>
+						受講許可を更新
+					</button>
+				</div>
 			</form>
 		</div>
 		{/if}

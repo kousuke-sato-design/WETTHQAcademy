@@ -29,26 +29,31 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// 認証が必要なルートの保護
-	const protectedRoutes = ['/user/dashboard', '/company/dashboard', '/admin/dashboard', '/contents'];
-	const isProtectedRoute = protectedRoutes.some((route) => event.url.pathname.startsWith(route));
+	// /admin/*, /company/*, /user/* 配下のすべてのページを保護（ログインページを除く）
+	const isAdminRoute = path.startsWith('/admin/') && path !== '/admin/login';
+	const isCompanyRoute = path.startsWith('/company/') && path !== '/company/login';
+	const isUserRoute = path.startsWith('/user/') && path !== '/user/login';
+	const isProtectedRoute = isAdminRoute || isCompanyRoute || isUserRoute;
 
 	if (isProtectedRoute && !event.locals.user) {
 		// ロールに応じてリダイレクト先を決定
-		if (event.url.pathname.startsWith('/admin/')) {
-			throw redirect(303, '/admin');
-		} else if (event.url.pathname.startsWith('/company/')) {
-			throw redirect(303, '/company');
+		if (path.startsWith('/admin/')) {
+			throw redirect(303, '/admin/login');
+		} else if (path.startsWith('/company/')) {
+			throw redirect(303, '/company/login');
 		} else {
-			throw redirect(303, '/user');
+			throw redirect(303, '/user/login');
 		}
 	}
 
 	// ロール別ルートの保護
-	if (event.url.pathname.startsWith('/admin/dashboard') && event.locals.user?.role !== 'master') {
-		throw redirect(303, '/company/dashboard');
+	// /admin/* へのアクセスはmasterロールが必要
+	if (isAdminRoute && event.locals.user && event.locals.user.role !== 'master') {
+		throw redirect(303, '/admin/login');
 	}
 
-	if (event.url.pathname.startsWith('/company/dashboard') && event.locals.user?.role === 'user') {
+	// /company/* へのアクセスはcompany_adminまたはmasterロールが必要
+	if (isCompanyRoute && event.locals.user && event.locals.user.role === 'user') {
 		throw redirect(303, '/user/dashboard');
 	}
 
