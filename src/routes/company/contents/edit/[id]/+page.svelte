@@ -362,6 +362,28 @@
 		}
 	}
 
+	// 選択範囲を保持する変数
+	let savedRange: Range | null = null;
+
+	// 選択範囲を保存
+	function saveSelection() {
+		const selection = window.getSelection();
+		if (selection && selection.rangeCount > 0) {
+			savedRange = selection.getRangeAt(0).cloneRange();
+		}
+	}
+
+	// 選択範囲を復元
+	function restoreSelection() {
+		if (savedRange) {
+			const selection = window.getSelection();
+			if (selection) {
+				selection.removeAllRanges();
+				selection.addRange(savedRange);
+			}
+		}
+	}
+
 	// モーダルを閉じる
 	function closeEditor() {
 		editingSection = null;
@@ -384,8 +406,11 @@
 			const editor = document.getElementById('visualEditor');
 			if (!editor) return;
 
+			// 保存された選択範囲を復元
+			restoreSelection();
+
 			const selection = window.getSelection();
-			const selectedText = selection?.toString() || '';
+			const selectedText = savedRange ? savedRange.toString() : (selection?.toString() || '');
 			let insertion = '';
 
 			switch (tag) {
@@ -423,18 +448,21 @@
 
 			// HTMLを挿入
 			editor.focus();
-			if (selection && selection.rangeCount > 0) {
-				const range = selection.getRangeAt(0);
+			const range = savedRange || (selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null);
+			if (range) {
 				range.deleteContents();
 				const fragment = range.createContextualFragment(insertion);
 				range.insertNode(fragment);
 				range.collapse(false);
-				selection.removeAllRanges();
-				selection.addRange(range);
+				if (selection) {
+					selection.removeAllRanges();
+					selection.addRange(range);
+				}
 			} else {
 				editor.innerHTML += insertion;
 			}
 			editorContent = editor.innerHTML;
+			savedRange = null;
 			return;
 		}
 
@@ -1198,6 +1226,8 @@
 							contenteditable="true"
 							on:input={handleVisualInput}
 							on:blur={handleVisualInput}
+							on:mouseup={saveSelection}
+							on:keyup={saveSelection}
 							class="w-full h-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white prose max-w-none"
 							style="min-height: 400px; outline: none;"
 						>{@html editorContent}</div>
