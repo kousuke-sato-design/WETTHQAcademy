@@ -67,7 +67,8 @@ export const actions = {
 		}), {
 			path: '/',
 			httpOnly: true,
-			sameSite: 'strict',
+			sameSite: 'lax',
+			secure: true,
 			maxAge: 60 * 60 * 24 * 7 // 1週間
 		});
 

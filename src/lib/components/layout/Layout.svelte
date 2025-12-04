@@ -23,7 +23,7 @@
 <div class="min-h-screen bg-gray-50">
 	<Header {user} />
 
-	<div class="flex relative">
+	<div class="flex relative pt-16">
 		<!-- ハンバーガーメニューボタン (モバイルのみ) -->
 		<button
 			on:click={toggleSidebar}
@@ -42,7 +42,7 @@
 		<!-- オーバーレイ (モバイルでサイドバーが開いている時) -->
 		{#if sidebarOpen}
 			<div
-				class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+				class="md:hidden fixed inset-0 top-16 bg-black bg-opacity-50 z-30"
 				on:click={closeSidebar}
 				on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
 				role="button"
@@ -53,10 +53,10 @@
 
 		<!-- サイドバー -->
 		<div class="
-			fixed md:static inset-y-0 left-0 z-40
+			fixed md:sticky top-16 bottom-0 left-0 z-40 md:h-[calc(100vh-4rem)]
 			transform transition-transform duration-300 ease-in-out
 			{sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-			md:block
+			md:block md:flex-shrink-0
 		">
 			{#if user && user.role === 'master'}
 				<AdminSidebar {user} />

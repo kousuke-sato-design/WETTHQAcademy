@@ -30,7 +30,7 @@
 	];
 </script>
 
-<aside class="w-64 bg-white border-r border-gray-200 min-h-screen">
+<aside class="w-64 bg-white border-r border-gray-200 h-full overflow-y-auto">
 	<nav class="p-4 space-y-1">
 		{#each adminMenuItems as item}
 			<a

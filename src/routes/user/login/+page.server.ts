@@ -83,7 +83,8 @@ export const actions = {
 				}), {
 					path: '/',
 					httpOnly: true,
-					sameSite: 'strict',
+					sameSite: 'lax',
+					secure: true,
 					maxAge: 60 * 60 * 24 * 7 // 1週間
 				});
 
@@ -135,14 +136,15 @@ export const actions = {
 			}), {
 				path: '/',
 				httpOnly: true,
-				sameSite: 'strict',
+				sameSite: 'lax',
+				secure: true,
 				maxAge: 60 * 60 * 24 * 7 // 1週間
 			});
 
 			// ダッシュボードへリダイレクト
 			throw redirect(303, '/user/dashboard');
-		} catch (error: any) {
-			if (error?.status === 303) {
+		} catch (error: unknown) {
+			if (error && typeof error === 'object' && 'status' in error && error.status === 303) {
 				throw error;
 			}
 			console.error('Login error:', error);

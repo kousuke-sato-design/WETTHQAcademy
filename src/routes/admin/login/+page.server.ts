@@ -37,7 +37,8 @@ export const actions = {
 		cookies.set('admin_session', JSON.stringify({ userId: user.id, role: user.role }), {
 			path: '/',
 			httpOnly: true,
-			sameSite: 'strict',
+			sameSite: 'lax',
+			secure: true,
 			maxAge: 60 * 60 * 24 * 7 // 1週間
 		});
 

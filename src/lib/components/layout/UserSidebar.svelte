@@ -29,7 +29,7 @@
 	}
 </script>
 
-<aside class="w-64 bg-white border-r border-gray-200 min-h-screen overflow-y-auto">
+<aside class="w-64 bg-white border-r border-gray-200 h-full overflow-y-auto">
 	<nav class="p-4 space-y-1">
 		<!-- ダッシュボード -->
 		<a

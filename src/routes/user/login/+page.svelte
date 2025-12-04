@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 
 	export let data: PageData;
@@ -8,6 +9,7 @@
 	let selectedCompanyId = '';
 	let loginId = '';
 	let password = '';
+	let isSubmitting = false;
 
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
@@ -45,7 +47,18 @@
 				</div>
 			{/if}
 
-			<form method="POST" use:enhance class="space-y-6">
+			<form method="POST" use:enhance={() => {
+				isSubmitting = true;
+				return async ({ result }) => {
+					isSubmitting = false;
+					if (result.type === 'redirect') {
+						await invalidateAll();
+						await goto(result.location, { replaceState: true });
+					} else {
+						await applyAction(result);
+					}
+				};
+			}} class="space-y-6">
 				<!-- 企業ID入力 -->
 				<div>
 					<label for="company_code" class="block text-sm font-medium text-gray-700 mb-2">
@@ -115,9 +128,14 @@
 				<!-- ログインボタン -->
 				<button
 					type="submit"
-					class="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
+					disabled={isSubmitting}
+					class="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					ログイン
+					{#if isSubmitting}
+						ログイン中...
+					{:else}
+						ログイン
+					{/if}
 				</button>
 			</form>
 

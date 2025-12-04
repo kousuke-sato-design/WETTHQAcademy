@@ -1160,11 +1160,19 @@
 						<div class="flex items-center space-x-1 border-r border-gray-300 pr-2">
 							<button
 								type="button"
+								on:click={() => insertHTML('color', '#374151')}
+								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+								title="黒色"
+							>
+								<span class="font-bold text-sm" style="color: #374151;">A</span>
+							</button>
+							<button
+								type="button"
 								on:click={() => insertHTML('color', '#FF0000')}
 								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
 								title="赤色"
 							>
-								<span class="text-red-600 font-bold text-sm">A</span>
+								<span class="font-bold text-sm" style="color: #FF0000;">A</span>
 							</button>
 							<button
 								type="button"
@@ -1172,7 +1180,7 @@
 								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
 								title="青色"
 							>
-								<span class="text-blue-600 font-bold text-sm">A</span>
+								<span class="font-bold text-sm" style="color: #0000FF;">A</span>
 							</button>
 							<button
 								type="button"
@@ -1180,7 +1188,23 @@
 								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
 								title="緑色"
 							>
-								<span class="text-green-600 font-bold text-sm">A</span>
+								<span class="font-bold text-sm" style="color: #008000;">A</span>
+							</button>
+							<button
+								type="button"
+								on:click={() => insertHTML('color', '#EA580C')}
+								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+								title="オレンジ"
+							>
+								<span class="font-bold text-sm" style="color: #EA580C;">A</span>
+							</button>
+							<button
+								type="button"
+								on:click={() => insertHTML('color', '#7C3AED')}
+								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+								title="紫色"
+							>
+								<span class="font-bold text-sm" style="color: #7C3AED;">A</span>
 							</button>
 						</div>
 
@@ -1192,7 +1216,7 @@
 								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
 								title="黄色マーカー"
 							>
-								<span class="bg-yellow-300 font-bold text-sm px-1">A</span>
+								<span class="font-bold text-sm px-1" style="background-color: #FFFF00;">A</span>
 							</button>
 							<button
 								type="button"
@@ -1200,7 +1224,7 @@
 								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
 								title="ピンクマーカー"
 							>
-								<span class="bg-pink-300 font-bold text-sm px-1">A</span>
+								<span class="font-bold text-sm px-1" style="background-color: #FFB6C1;">A</span>
 							</button>
 							<button
 								type="button"
@@ -1208,7 +1232,31 @@
 								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
 								title="緑マーカー"
 							>
-								<span class="bg-green-300 font-bold text-sm px-1">A</span>
+								<span class="font-bold text-sm px-1" style="background-color: #90EE90;">A</span>
+							</button>
+							<button
+								type="button"
+								on:click={() => insertHTML('bgcolor', '#BFDBFE')}
+								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+								title="青マーカー"
+							>
+								<span class="font-bold text-sm px-1" style="background-color: #BFDBFE;">A</span>
+							</button>
+							<button
+								type="button"
+								on:click={() => insertHTML('bgcolor', '#FED7AA')}
+								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+								title="オレンジマーカー"
+							>
+								<span class="font-bold text-sm px-1" style="background-color: #FED7AA;">A</span>
+							</button>
+							<button
+								type="button"
+								on:click={() => insertHTML('bgcolor', '#DDD6FE')}
+								class="px-2 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+								title="紫マーカー"
+							>
+								<span class="font-bold text-sm px-1" style="background-color: #DDD6FE;">A</span>
 							</button>
 						</div>
 

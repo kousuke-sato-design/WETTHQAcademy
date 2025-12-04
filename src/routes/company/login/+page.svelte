@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { enhance } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { enhance, applyAction } from '$app/forms';
+	import type { ActionData } from './$types';
 
-	let error = '';
+	export let form: ActionData;
+	let isSubmitting = false;
 
 	function getIconSVG(iconName: string) {
 		const icons: Record<string, string> = {
@@ -44,10 +46,21 @@
 					<p class="text-gray-600 text-sm">THQサービスご利用企業様</p>
 				</div>
 
-				<form method="POST" action="?/login" use:enhance class="space-y-5">
-					{#if error}
+				<form method="POST" action="?/login" use:enhance={() => {
+					isSubmitting = true;
+					return async ({ result }) => {
+						isSubmitting = false;
+						if (result.type === 'redirect') {
+							await invalidateAll();
+							await goto(result.location, { replaceState: true });
+						} else {
+							await applyAction(result);
+						}
+					};
+				}} class="space-y-5">
+					{#if form?.error}
 						<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-							{error}
+							{form.error}
 						</div>
 					{/if}
 
@@ -95,9 +108,14 @@
 
 					<button
 						type="submit"
-						class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
+						disabled={isSubmitting}
+						class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						ログイン
+						{#if isSubmitting}
+							ログイン中...
+						{:else}
+							ログイン
+						{/if}
 					</button>
 				</form>
 
