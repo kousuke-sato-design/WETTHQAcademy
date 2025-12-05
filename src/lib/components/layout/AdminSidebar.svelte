@@ -23,10 +23,8 @@
 		{ href: '/admin/companies', label: '企業管理', icon: 'company' },
 		{ href: '/admin/staff', label: '担当者管理', icon: 'users' },
 		{ href: '/admin/students', label: '生徒管理', icon: 'users' },
-		{ href: '/admin/contents', label: '共有コンテンツ', icon: 'document' },
-		{ href: '/admin/company-contents', label: '企業専用コンテンツ', icon: 'lock' },
-		{ href: '/admin/templates', label: '共通テンプレート', icon: 'mail' },
-		{ href: '/admin/company-templates', label: '企業専用テンプレート', icon: 'mail' }
+		{ href: '/admin/contents', label: 'コンテンツ管理', icon: 'document' },
+		{ href: '/admin/templates', label: 'テンプレート管理', icon: 'mail' }
 	];
 </script>
 

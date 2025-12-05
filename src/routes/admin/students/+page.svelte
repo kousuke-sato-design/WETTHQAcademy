@@ -19,6 +19,8 @@
 	// 編集フォーム入力
 	let editLoginId = '';
 	let editPassword = '';
+	let isSubmitting = false;
+	let editError = '';
 
 	// フィルター
 	let selectedFilterCompanyId = '';
@@ -71,6 +73,8 @@
 		selectedStudent = null;
 		editLoginId = '';
 		editPassword = '';
+		editError = '';
+		isSubmitting = false;
 	}
 
 	// フィルタリングされた生徒
@@ -196,7 +200,7 @@
 									<div class="text-sm text-gray-600">{student.company_name || '-'}</div>
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap">
-									{#if student.use_unified_id === 1}
+									{#if Number(student.use_unified_id) === 1}
 										<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
 											統一ID
 										</span>
@@ -213,10 +217,11 @@
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm">
 									<div class="flex items-center space-x-3">
-										{#if student.use_unified_id === 1}
+										{#if Number(student.use_unified_id) === 1}
 											<button
+												type="button"
 												on:click={() => openEditModal(student)}
-												class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+												class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
 											>
 												<div class="w-4 h-4 mr-1">
 													{@html getIconSVG('edit')}
@@ -352,8 +357,28 @@
 				</button>
 			</div>
 
-			<form method="POST" action="?/updateStudent" use:enhance class="p-6 space-y-6">
+			<form method="POST" action="?/updateStudent" use:enhance={() => {
+				isSubmitting = true;
+				editError = '';
+				return async ({ result, update }) => {
+					isSubmitting = false;
+					if (result.type === 'failure') {
+						editError = result.data?.error || '更新に失敗しました';
+					} else if (result.type === 'success') {
+						await update();
+					} else {
+						await update();
+					}
+				};
+			}} class="p-6 space-y-6">
 				<input type="hidden" name="id" value={selectedStudent.id} />
+
+				<!-- エラー表示 -->
+				{#if editError}
+					<div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+						<p class="text-red-800 font-medium">{editError}</p>
+					</div>
+				{/if}
 
 				<div class="space-y-4">
 					<!-- 生徒情報（表示のみ） -->
@@ -413,15 +438,27 @@
 					<button
 						type="button"
 						on:click={closeModals}
-						class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+						disabled={isSubmitting}
+						class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
 					>
 						キャンセル
 					</button>
 					<button
 						type="submit"
-						class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+						disabled={isSubmitting}
+						class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						更新する
+						{#if isSubmitting}
+							<span class="flex items-center">
+								<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								更新中...
+							</span>
+						{:else}
+							更新する
+						{/if}
 					</button>
 				</div>
 			</form>

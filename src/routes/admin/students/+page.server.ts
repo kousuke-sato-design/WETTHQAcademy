@@ -124,8 +124,10 @@ export const actions = {
 	},
 
 	updateStudent: async ({ request, locals }) => {
+		console.log('[updateStudent] アクション開始');
 		const db = locals.db;
 		if (!db) {
+			console.error('[updateStudent] データベース接続なし');
 			return fail(500, { error: 'データベース接続エラー' });
 		}
 
@@ -133,6 +135,7 @@ export const actions = {
 		const id = data.get('id')?.toString();
 		const login_id = data.get('login_id')?.toString();
 		const password = data.get('password')?.toString();
+		console.log(`[updateStudent] ID: ${id}, login_id: ${login_id}, password入力: ${password ? 'あり' : 'なし'}`);
 
 		// バリデーション
 		if (!id) {
@@ -159,22 +162,41 @@ export const actions = {
 			}
 
 			const student = studentResult.rows[0];
-			if (student.use_unified_id !== 1) {
+			if (Number(student.use_unified_id) !== 1) {
 				return fail(400, { error: '統一ID以外の生徒は編集できません' });
 			}
 
-			// ログインIDの重複チェック（自分以外で同じログインIDがないか）
-			const duplicateCheck = await db.execute({
-				sql: 'SELECT id FROM students WHERE login_id = ? AND id != ?',
-				args: [login_id, parseInt(id)]
-			});
+			const currentLoginId = student.login_id as string;
+			const isLoginIdChanged = login_id !== currentLoginId;
 
-			if (duplicateCheck.rows.length > 0) {
-				return fail(400, { error: 'このユーザーIDは既に使用されています' });
+			// ログインIDが変更される場合のみ重複チェック
+			if (isLoginIdChanged) {
+				const duplicateCheck = await db.execute({
+					sql: 'SELECT id FROM students WHERE login_id = ? AND id != ?',
+					args: [login_id, parseInt(id)]
+				});
+
+				if (duplicateCheck.rows.length > 0) {
+					return fail(400, { error: 'このユーザーIDは既に使用されています' });
+				}
 			}
 
-			// パスワードが入力されている場合はハッシュ化して更新
-			if (password && password.length > 0) {
+			// パスワードのみ変更（ログインIDは変更なし）
+			if (!isLoginIdChanged && password && password.length > 0) {
+				if (password.length < 4) {
+					return fail(400, { error: 'パスワードは4文字以上で入力してください' });
+				}
+				const passwordHash = await bcrypt.hash(password, 10);
+				await db.execute({
+					sql: 'UPDATE students SET password_hash = ? WHERE id = ?',
+					args: [passwordHash, parseInt(id)]
+				});
+				console.log(`[統一ID生徒更新] ID: ${id} のパスワードのみを更新しました`);
+				return { success: true, message: 'パスワードを更新しました' };
+			}
+
+			// ログインIDとパスワード両方変更
+			if (isLoginIdChanged && password && password.length > 0) {
 				if (password.length < 4) {
 					return fail(400, { error: 'パスワードは4文字以上で入力してください' });
 				}
@@ -185,8 +207,10 @@ export const actions = {
 				});
 				console.log(`[統一ID生徒更新] ID: ${id} のユーザーIDとパスワードを更新しました`);
 				return { success: true, message: 'ユーザーIDとパスワードを更新しました' };
-			} else {
-				// パスワードが空の場合はログインIDのみ更新
+			}
+
+			// ログインIDのみ変更（パスワードは変更なし）
+			if (isLoginIdChanged && (!password || password.length === 0)) {
 				await db.execute({
 					sql: 'UPDATE students SET login_id = ? WHERE id = ?',
 					args: [login_id, parseInt(id)]
@@ -194,6 +218,9 @@ export const actions = {
 				console.log(`[統一ID生徒更新] ID: ${id} のユーザーIDを更新しました`);
 				return { success: true, message: 'ユーザーIDを更新しました' };
 			}
+
+			// 何も変更がない場合
+			return fail(400, { error: '変更内容がありません。ユーザーIDまたはパスワードを変更してください' });
 		} catch (error) {
 			console.error('Student update error:', error);
 			return fail(500, { error: 'データベースエラーが発生しました' });

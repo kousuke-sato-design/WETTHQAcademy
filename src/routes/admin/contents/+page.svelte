@@ -6,6 +6,9 @@
 	export let data: PageData;
 	export let form: ActionData;
 
+	// タブ切り替え（共有コンテンツ / 企業専用コンテンツ）
+	let activeTab: 'shared' | 'company' = 'shared';
+
 	let showCreateModal = false;
 	let showDeleteModal = false;
 	let selectedContent: any = null;
@@ -80,7 +83,10 @@
 			video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
 			plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
 			x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-			trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>'
+			trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+			company: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>',
+			arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+			share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
 		};
 		return icons[iconName] || '';
 	}
@@ -116,11 +122,42 @@
 <Layout user={data.user}>
 	<div class="max-w-6xl">
 		<!-- ヘッダー -->
-		<div class="mb-8 flex items-center justify-between">
-			<div>
-				<h1 class="text-3xl font-bold text-gray-900 mb-2">コンテンツ管理</h1>
-				<p class="text-gray-600">学習コンテンツの作成と管理</p>
+		<div class="mb-6">
+			<h1 class="text-3xl font-bold text-gray-900 mb-2">コンテンツ管理</h1>
+			<p class="text-gray-600">学習コンテンツの作成と管理</p>
+		</div>
+
+		<!-- タブ切り替え -->
+		<div class="mb-6">
+			<div class="border-b border-gray-200">
+				<nav class="-mb-px flex space-x-8">
+					<button
+						on:click={() => activeTab = 'shared'}
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'shared' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+					>
+						<div class="flex items-center space-x-2">
+							<div class="w-4 h-4">{@html getIconSVG('share')}</div>
+							<span>共有コンテンツ</span>
+							<span class="bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs">{data.contents.length}</span>
+						</div>
+					</button>
+					<button
+						on:click={() => activeTab = 'company'}
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'company' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+					>
+						<div class="flex items-center space-x-2">
+							<div class="w-4 h-4">{@html getIconSVG('company')}</div>
+							<span>企業専用コンテンツ</span>
+							<span class="bg-purple-100 text-purple-600 py-0.5 px-2 rounded-full text-xs">{data.companies?.length || 0}</span>
+						</div>
+					</button>
+				</nav>
 			</div>
+		</div>
+
+		<!-- 共有コンテンツタブ -->
+		{#if activeTab === 'shared'}
+		<div class="flex items-center justify-end mb-6">
 			<a
 				href="/admin/contents/new"
 				class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center space-x-2"
@@ -294,6 +331,51 @@
 				</table>
 			</div>
 		</div>
+		{/if}
+
+		<!-- 企業専用コンテンツタブ -->
+		{#if activeTab === 'company'}
+		<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+			<div class="px-6 py-4 border-b border-gray-200">
+				<h2 class="text-lg font-semibold text-gray-900">企業を選択してコンテンツを管理</h2>
+				<p class="text-sm text-gray-600 mt-1">各企業専用のコンテンツを作成・編集できます</p>
+			</div>
+			<div class="divide-y divide-gray-200">
+				{#each data.companies || [] as company}
+					<a
+						href="/admin/company-contents/{company.id}"
+						class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+					>
+						<div class="flex items-center space-x-4">
+							<div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+								<div class="w-5 h-5">
+									{@html getIconSVG('company')}
+								</div>
+							</div>
+							<div>
+								<p class="text-sm font-medium text-gray-900">{company.company_name}</p>
+								<p class="text-xs text-gray-500">企業コード: {company.company_code || '-'}</p>
+							</div>
+						</div>
+						<div class="flex items-center space-x-4">
+							<div class="text-right">
+								<p class="text-sm font-medium text-gray-900">{company.content_count || 0}</p>
+								<p class="text-xs text-gray-500">コンテンツ</p>
+							</div>
+							<div class="w-5 h-5 text-gray-400">
+								{@html getIconSVG('arrow')}
+							</div>
+						</div>
+					</a>
+				{:else}
+					<div class="px-6 py-12 text-center text-gray-500">
+						企業が登録されていません。<br />
+						<a href="/admin/companies" class="text-blue-600 hover:underline">企業管理</a>から企業を登録してください。
+					</div>
+				{/each}
+			</div>
+		</div>
+		{/if}
 	</div>
 
 	<!-- 新規コンテンツ作成モーダル -->

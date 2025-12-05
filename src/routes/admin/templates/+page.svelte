@@ -6,6 +6,9 @@
 	export let data: PageData;
 	export let form: ActionData;
 
+	// タブ切り替え（共通テンプレート / 企業専用テンプレート）
+	let activeTab: 'shared' | 'company' = 'shared';
+
 	let showCreateModal = false;
 	let showEditModal = false;
 	let showDeleteModal = false;
@@ -41,7 +44,10 @@
 			edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
 			eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
 			copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-			send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'
+			send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+			company: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>',
+			arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+			share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
 		};
 		return icons[iconName] || '';
 	}
@@ -111,20 +117,37 @@
 <Layout user={data.user}>
 	<div class="max-w-6xl">
 		<!-- ヘッダー -->
-		<div class="mb-8 flex items-center justify-between">
-			<div>
-				<h1 class="text-3xl font-bold text-gray-900 mb-2">メールテンプレート</h1>
-				<p class="text-gray-600">生徒へのログイン案内などのメールテンプレートを管理</p>
+		<div class="mb-6">
+			<h1 class="text-3xl font-bold text-gray-900 mb-2">テンプレート管理</h1>
+			<p class="text-gray-600">メールテンプレートの作成と管理</p>
+		</div>
+
+		<!-- タブ切り替え -->
+		<div class="mb-6">
+			<div class="border-b border-gray-200">
+				<nav class="-mb-px flex space-x-8">
+					<button
+						on:click={() => activeTab = 'shared'}
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'shared' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+					>
+						<div class="flex items-center space-x-2">
+							<div class="w-4 h-4">{@html getIconSVG('share')}</div>
+							<span>共通テンプレート</span>
+							<span class="bg-purple-100 text-purple-600 py-0.5 px-2 rounded-full text-xs">{data.templates?.length || 0}</span>
+						</div>
+					</button>
+					<button
+						on:click={() => activeTab = 'company'}
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab === 'company' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
+					>
+						<div class="flex items-center space-x-2">
+							<div class="w-4 h-4">{@html getIconSVG('company')}</div>
+							<span>企業専用テンプレート</span>
+							<span class="bg-green-100 text-green-600 py-0.5 px-2 rounded-full text-xs">{data.companies?.length || 0}</span>
+						</div>
+					</button>
+				</nav>
 			</div>
-			<button
-				on:click={openCreateModal}
-				class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center space-x-2"
-			>
-				<div class="w-4 h-4">
-					{@html getIconSVG('plus')}
-				</div>
-				<span>新規テンプレート</span>
-			</button>
 		</div>
 
 		<!-- メッセージ表示 -->
@@ -140,31 +163,18 @@
 			</div>
 		{/if}
 
-		<!-- 統計カード -->
-		<div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8 max-w-md">
-			<div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-				<div class="flex items-center justify-between">
-					<div>
-						<p class="text-sm text-gray-600 mb-1">共通テンプレート数</p>
-						<p class="text-3xl font-bold text-gray-900">{data.templates?.length || 0}</p>
-					</div>
-					<div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
-						<div class="w-7 h-7">
-							{@html getIconSVG('mail')}
-						</div>
-					</div>
+		<!-- 共通テンプレートタブ -->
+		{#if activeTab === 'shared'}
+		<div class="flex items-center justify-end mb-6">
+			<button
+				on:click={openCreateModal}
+				class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center space-x-2"
+			>
+				<div class="w-4 h-4">
+					{@html getIconSVG('plus')}
 				</div>
-			</div>
-		</div>
-
-		<!-- 企業専用テンプレートへのリンク -->
-		<div class="mb-6">
-			<a href="/admin/company-templates" class="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700 hover:bg-green-100 transition-colors">
-				<div class="w-4 h-4 mr-2">
-					{@html getIconSVG('mail')}
-				</div>
-				<span>企業専用テンプレートを管理</span>
-			</a>
+				<span>新規テンプレート</span>
+			</button>
 		</div>
 
 		<!-- テンプレートリスト -->
@@ -257,6 +267,51 @@
 				</div>
 			{/if}
 		</div>
+		{/if}
+
+		<!-- 企業専用テンプレートタブ -->
+		{#if activeTab === 'company'}
+		<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+			<div class="px-6 py-4 border-b border-gray-200">
+				<h2 class="text-lg font-semibold text-gray-900">企業を選択してテンプレートを管理</h2>
+				<p class="text-sm text-gray-600 mt-1">各企業専用のテンプレートを作成・編集できます</p>
+			</div>
+			<div class="divide-y divide-gray-200">
+				{#each data.companies || [] as company}
+					<a
+						href="/admin/company-templates/{company.id}"
+						class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+					>
+						<div class="flex items-center space-x-4">
+							<div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white">
+								<div class="w-5 h-5">
+									{@html getIconSVG('company')}
+								</div>
+							</div>
+							<div>
+								<p class="text-sm font-medium text-gray-900">{company.company_name}</p>
+								<p class="text-xs text-gray-500">企業コード: {company.company_code || '-'}</p>
+							</div>
+						</div>
+						<div class="flex items-center space-x-4">
+							<div class="text-right">
+								<p class="text-sm font-medium text-gray-900">{company.template_count || 0}</p>
+								<p class="text-xs text-gray-500">テンプレート</p>
+							</div>
+							<div class="w-5 h-5 text-gray-400">
+								{@html getIconSVG('arrow')}
+							</div>
+						</div>
+					</a>
+				{:else}
+					<div class="px-6 py-12 text-center text-gray-500">
+						企業が登録されていません。<br />
+						<a href="/admin/companies" class="text-green-600 hover:underline">企業管理</a>から企業を登録してください。
+					</div>
+				{/each}
+			</div>
+		</div>
+		{/if}
 	</div>
 </Layout>
 

@@ -27,9 +27,28 @@ export const load: PageServerLoad = async ({ locals }) => {
 		updated_at: row.updated_at as string
 	}));
 
+	// 企業一覧を取得（企業専用テンプレートタブ用）
+	const companiesResult = await db.execute(`
+		SELECT
+			c.id,
+			c.company_name,
+			c.company_code,
+			(SELECT COUNT(*) FROM mail_templates WHERE target_company_id = c.id) as template_count
+		FROM companies c
+		ORDER BY c.company_name ASC
+	`);
+
+	const companies = companiesResult.rows.map((row) => ({
+		id: row.id as number,
+		company_name: row.company_name as string,
+		company_code: row.company_code as string | null,
+		template_count: row.template_count as number
+	}));
+
 	return {
 		user: locals.user,
-		templates
+		templates,
+		companies
 	};
 };
 
