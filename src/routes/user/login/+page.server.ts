@@ -39,14 +39,26 @@ export const actions = {
 		try {
 			// 統一IDユーザーの場合（login_id = "user"）
 			if (login_id === 'user') {
-				// 統一IDユーザーを検索
+				// まず企業コードから企業IDを取得
+				const companyResult = await db.execute({
+					sql: 'SELECT id FROM companies WHERE company_code = ?',
+					args: [company_code]
+				});
+
+				if (companyResult.rows.length === 0) {
+					return fail(400, { error: '企業IDが正しくありません' });
+				}
+
+				const company_id = companyResult.rows[0].id as number;
+
+				// その企業の統一IDユーザーを検索
 				const result = await db.execute({
 					sql: `
 						SELECT id, login_id, password_hash, company_id, name, use_unified_id
 						FROM students
-						WHERE login_id = ? AND use_unified_id = 1
+						WHERE login_id = ? AND use_unified_id = 1 AND company_id = ?
 					`,
-					args: [login_id]
+					args: [login_id, company_id]
 				});
 
 				if (result.rows.length === 0) {
@@ -62,18 +74,6 @@ export const actions = {
 				if (!validPassword) {
 					return fail(400, { error: 'ユーザーIDまたはパスワードが正しくありません' });
 				}
-
-				// 企業コードから企業IDを取得（統一IDユーザーの場合、ログイン時に企業を指定）
-				const companyResult = await db.execute({
-					sql: 'SELECT id FROM companies WHERE company_code = ?',
-					args: [company_code]
-				});
-
-				if (companyResult.rows.length === 0) {
-					return fail(400, { error: '企業IDが正しくありません' });
-				}
-
-				const company_id = companyResult.rows[0].id as number;
 
 				// セッションにログイン（企業IDを保存）
 				cookies.set('user_session', JSON.stringify({
