@@ -9,3 +9,6 @@ node_modules
 !.env.test
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Wrangler local state (Miniflare)
+.wrangler

@@ -12,3 +12,12 @@ database_id = "c72094d5-6b99-4afe-9d3e-aee016b5a10d"
 [[r2_buckets]]
 binding = "VIDEOS"
 bucket_name = "webthqacademy-videos"
+
+# ローカル開発用の設定（Miniflare）
+[dev]
+port = 5173
+
+# ローカルD1/R2のデータ永続化ディレクトリ
+[miniflare]
+d1_persist = ".wrangler/state/d1"
+r2_persist = ".wrangler/state/r2"

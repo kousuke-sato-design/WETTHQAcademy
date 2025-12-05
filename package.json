@@ -4,14 +4,19 @@
   "description": "ストレスチェック知識補完プラットフォーム",
   "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev --d1 DB=webthqacademy-db -- npm run dev:sveltekit",
+    "dev": "wrangler pages dev --local --persist-to .wrangler/state -- npm run dev:sveltekit",
+    "dev:remote": "wrangler pages dev --d1 DB=webthqacademy-db --r2 VIDEOS=webthqacademy-videos -- npm run dev:sveltekit",
     "dev:sveltekit": "vite dev",
     "build": "vite build",
     "preview": "wrangler pages dev .svelte-kit/cloudflare",
     "deploy": "npm run build && wrangler pages deploy .svelte-kit/cloudflare",
+    "release": "git add -A && git commit -m \"Release\" && git push origin main && npm run deploy",
+    "push-deploy": "git push origin main && npm run deploy",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "db:migrate": "wrangler d1 execute webthqacademy-db --file=migrations/0001_initial_schema.sql --remote",
-    "db:seed": "wrangler d1 execute webthqacademy-db --file=migrations/0002_seed_data.sql --remote"
+    "db:migrate:local": "wrangler d1 execute webthqacademy-db --file=migrations/0001_initial_schema.sql --local --persist-to .wrangler/state",
+    "db:seed": "wrangler d1 execute webthqacademy-db --file=migrations/0002_seed_data.sql --remote",
+    "db:seed:local": "wrangler d1 execute webthqacademy-db --file=migrations/0002_seed_data.sql --local --persist-to .wrangler/state"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251117.0",
