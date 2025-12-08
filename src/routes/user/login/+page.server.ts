@@ -37,61 +37,6 @@ export const actions = {
 		}
 
 		try {
-			// 統一IDユーザーの場合（login_id = "user"）
-			if (login_id === 'user') {
-				// まず企業コードから企業IDを取得
-				const companyResult = await db.execute({
-					sql: 'SELECT id FROM companies WHERE company_code = ?',
-					args: [company_code]
-				});
-
-				if (companyResult.rows.length === 0) {
-					return fail(400, { error: '企業IDが正しくありません' });
-				}
-
-				const company_id = companyResult.rows[0].id as number;
-
-				// その企業の統一IDユーザーを検索
-				const result = await db.execute({
-					sql: `
-						SELECT id, login_id, password_hash, company_id, name, use_unified_id
-						FROM students
-						WHERE login_id = ? AND use_unified_id = 1 AND company_id = ?
-					`,
-					args: [login_id, company_id]
-				});
-
-				if (result.rows.length === 0) {
-					return fail(400, { error: 'ユーザーIDまたはパスワードが正しくありません' });
-				}
-
-				const user = result.rows[0];
-				const passwordHash = user.password_hash as string;
-
-				// パスワードを検証
-				const validPassword = await bcrypt.compare(password, passwordHash);
-
-				if (!validPassword) {
-					return fail(400, { error: 'ユーザーIDまたはパスワードが正しくありません' });
-				}
-
-				// セッションにログイン（企業IDを保存）
-				cookies.set('user_session', JSON.stringify({
-					userId: user.id,
-					role: 'user',
-					company_id: company_id
-				}), {
-					path: '/',
-					httpOnly: true,
-					sameSite: 'lax',
-					secure: true,
-					maxAge: 60 * 60 * 24 * 7 // 1週間
-				});
-
-				throw redirect(303, '/user/dashboard');
-			}
-
-			// 個別IDユーザーの場合
 			// 企業コードから企業IDを取得
 			const companyResult = await db.execute({
 				sql: 'SELECT id FROM companies WHERE company_code = ?',
@@ -104,12 +49,12 @@ export const actions = {
 
 			const company_id = companyResult.rows[0].id as number;
 
-			// ユーザーを検索（企業ID、ログインIDで検索）
+			// ユーザーを検索（企業ID、ログインIDで検索 - 統一ID/個別IDを問わず）
 			const result = await db.execute({
 				sql: `
 					SELECT id, login_id, password_hash, company_id, name, use_unified_id
 					FROM students
-					WHERE company_id = ? AND login_id = ? AND use_unified_id = 0
+					WHERE company_id = ? AND login_id = ?
 				`,
 				args: [company_id, login_id]
 			});
@@ -132,7 +77,7 @@ export const actions = {
 			cookies.set('user_session', JSON.stringify({
 				userId: user.id,
 				role: 'user',
-				company_id: user.company_id
+				company_id: company_id
 			}), {
 				path: '/',
 				httpOnly: true,
