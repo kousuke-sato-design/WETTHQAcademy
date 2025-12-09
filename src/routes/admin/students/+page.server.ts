@@ -64,6 +64,7 @@ export const actions = {
 		const company_id = data.get('company_id')?.toString();
 		const employee_number = data.get('employee_number')?.toString();
 		const name = data.get('name')?.toString();
+		const use_unified_id = data.get('use_unified_id') === 'on' ? 1 : 0;
 
 		// バリデーション
 		if (!company_id) {
@@ -83,24 +84,27 @@ export const actions = {
 		const password = employee_number;
 
 		try {
-			// 同じ企業内での重複チェック
-			const duplicateCheck = await db.execute({
-				sql: 'SELECT id FROM students WHERE login_id = ? AND company_id = ?',
-				args: [login_id, parseInt(company_id)]
-			});
+			// 同じ企業内での重複チェック（統一IDでない場合のみ）
+			if (use_unified_id === 0) {
+				const duplicateCheck = await db.execute({
+					sql: 'SELECT id FROM students WHERE login_id = ? AND company_id = ?',
+					args: [login_id, parseInt(company_id)]
+				});
 
-			if (duplicateCheck.rows.length > 0) {
-				return fail(400, { error: 'このユーザーIDは同じ企業内で既に使用されています' });
+				if (duplicateCheck.rows.length > 0) {
+					return fail(400, { error: 'このユーザーIDは同じ企業内で既に使用されています' });
+				}
 			}
 
 			const passwordHash = await bcrypt.hash(password, 10);
 
 			await db.execute({
 				sql: 'INSERT INTO students (login_id, password_hash, company_id, name, use_unified_id) VALUES (?, ?, ?, ?, ?)',
-				args: [login_id, passwordHash, parseInt(company_id), name, 0]
+				args: [login_id, passwordHash, parseInt(company_id), name, use_unified_id]
 			});
 
-			return { success: true, message: '生徒を登録しました' };
+			const studentType = use_unified_id === 1 ? '統一ID生徒' : '通常生徒';
+			return { success: true, message: `${studentType}を登録しました` };
 		} catch (error) {
 			console.error('Student creation error:', error);
 			return fail(500, { error: 'データベースエラーが発生しました' });
