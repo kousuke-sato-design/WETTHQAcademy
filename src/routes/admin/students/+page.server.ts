@@ -165,9 +165,9 @@ export const actions = {
 		}
 
 		try {
-			// 生徒が存在するか確認（統一IDのみ更新可能）
+			// 生徒が存在するか確認
 			const studentResult = await db.execute({
-				sql: 'SELECT id, use_unified_id, login_id FROM students WHERE id = ?',
+				sql: 'SELECT id, use_unified_id, login_id, company_id FROM students WHERE id = ?',
 				args: [parseInt(id)]
 			});
 
@@ -176,15 +176,11 @@ export const actions = {
 			}
 
 			const student = studentResult.rows[0];
-			if (Number(student.use_unified_id) !== 1) {
-				return fail(400, { error: '統一ID以外の生徒は編集できません' });
-			}
-
 			const currentLoginId = student.login_id as string;
 			const isLoginIdChanged = login_id !== currentLoginId;
 
-			// ログインIDが変更される場合、同じ企業内での重複チェック
-			if (isLoginIdChanged) {
+			// ログインIDが変更される場合、同じ企業内での重複チェック（通常生徒のみ）
+			if (isLoginIdChanged && Number(student.use_unified_id) === 0) {
 				const duplicateCheck = await db.execute({
 					sql: 'SELECT id FROM students WHERE login_id = ? AND company_id = ? AND id != ?',
 					args: [login_id, student.company_id, parseInt(id)]
@@ -205,7 +201,7 @@ export const actions = {
 					sql: 'UPDATE students SET password_hash = ? WHERE id = ?',
 					args: [passwordHash, parseInt(id)]
 				});
-				console.log(`[統一ID生徒更新] ID: ${id} のパスワードのみを更新しました`);
+				console.log(`[生徒更新] ID: ${id} のパスワードのみを更新しました`);
 				return { success: true, message: 'パスワードを更新しました' };
 			}
 
@@ -219,7 +215,7 @@ export const actions = {
 					sql: 'UPDATE students SET login_id = ?, password_hash = ? WHERE id = ?',
 					args: [login_id, passwordHash, parseInt(id)]
 				});
-				console.log(`[統一ID生徒更新] ID: ${id} のユーザーIDとパスワードを更新しました`);
+				console.log(`[生徒更新] ID: ${id} のユーザーIDとパスワードを更新しました`);
 				return { success: true, message: 'ユーザーIDとパスワードを更新しました' };
 			}
 
@@ -229,12 +225,12 @@ export const actions = {
 					sql: 'UPDATE students SET login_id = ? WHERE id = ?',
 					args: [login_id, parseInt(id)]
 				});
-				console.log(`[統一ID生徒更新] ID: ${id} のユーザーIDを更新しました`);
+				console.log(`[生徒更新] ID: ${id} のユーザーIDを更新しました`);
 				return { success: true, message: 'ユーザーIDを更新しました' };
 			}
 
 			// 何も変更がない場合（エラーではなく成功として扱う）
-			console.log(`[統一ID生徒更新] ID: ${id} は変更なし`);
+			console.log(`[生徒更新] ID: ${id} は変更なし`);
 			return { success: true, message: '変更はありませんでした' };
 		} catch (error) {
 			console.error('Student update error:', error);

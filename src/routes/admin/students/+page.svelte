@@ -219,18 +219,16 @@
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm">
 									<div class="flex items-center space-x-3">
-										{#if Number(student.use_unified_id) === 1}
-											<button
-												type="button"
-												on:click={() => openEditModal(student)}
-												class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-											>
-												<div class="w-4 h-4 mr-1">
-													{@html getIconSVG('edit')}
-												</div>
-												編集
-											</button>
-										{/if}
+										<button
+											type="button"
+											on:click={() => openEditModal(student)}
+											class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+										>
+											<div class="w-4 h-4 mr-1">
+												{@html getIconSVG('edit')}
+											</div>
+											編集
+										</button>
 										<button
 											on:click={() => openDeleteModal(student)}
 											class="inline-flex items-center text-red-600 hover:text-red-700 font-medium"
@@ -367,7 +365,9 @@
 	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 		<div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
 			<div class="flex items-center justify-between p-6 border-b border-gray-200">
-				<h2 class="text-2xl font-bold text-gray-900">統一ID生徒の編集</h2>
+				<h2 class="text-2xl font-bold text-gray-900">
+					{Number(selectedStudent.use_unified_id) === 1 ? '統一ID生徒の編集' : '生徒の編集'}
+				</h2>
 				<button
 					on:click={closeModals}
 					class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
@@ -403,11 +403,17 @@
 
 				<div class="space-y-4">
 					<!-- 生徒情報（表示のみ） -->
-					<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+					<div class="{Number(selectedStudent.use_unified_id) === 1 ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'} border rounded-lg p-4">
 						<div class="flex items-center space-x-2 mb-2">
-							<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-								統一ID
-							</span>
+							{#if Number(selectedStudent.use_unified_id) === 1}
+								<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+									統一ID
+								</span>
+							{:else}
+								<span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+									通常
+								</span>
+							{/if}
 						</div>
 						<p class="text-sm text-gray-700 mb-1">
 							<span class="font-medium">名前:</span> {selectedStudent.name}
