@@ -82,9 +82,19 @@ export const actions = {
 		const login_id = employee_number;
 		const password = employee_number;
 
-		const passwordHash = await bcrypt.hash(password, 10);
-
 		try {
+			// 同じ企業内での重複チェック
+			const duplicateCheck = await db.execute({
+				sql: 'SELECT id FROM students WHERE login_id = ? AND company_id = ?',
+				args: [login_id, parseInt(company_id)]
+			});
+
+			if (duplicateCheck.rows.length > 0) {
+				return fail(400, { error: 'このユーザーIDは同じ企業内で既に使用されています' });
+			}
+
+			const passwordHash = await bcrypt.hash(password, 10);
+
 			await db.execute({
 				sql: 'INSERT INTO students (login_id, password_hash, company_id, name, use_unified_id) VALUES (?, ?, ?, ?, ?)',
 				args: [login_id, passwordHash, parseInt(company_id), name, 0]
@@ -169,15 +179,15 @@ export const actions = {
 			const currentLoginId = student.login_id as string;
 			const isLoginIdChanged = login_id !== currentLoginId;
 
-			// ログインIDが変更される場合のみ重複チェック
+			// ログインIDが変更される場合、同じ企業内での重複チェック
 			if (isLoginIdChanged) {
 				const duplicateCheck = await db.execute({
-					sql: 'SELECT id FROM students WHERE login_id = ? AND id != ?',
-					args: [login_id, parseInt(id)]
+					sql: 'SELECT id FROM students WHERE login_id = ? AND company_id = ? AND id != ?',
+					args: [login_id, student.company_id, parseInt(id)]
 				});
 
 				if (duplicateCheck.rows.length > 0) {
-					return fail(400, { error: 'このユーザーIDは既に使用されています' });
+					return fail(400, { error: 'このユーザーIDは同じ企業内で既に使用されています' });
 				}
 			}
 
