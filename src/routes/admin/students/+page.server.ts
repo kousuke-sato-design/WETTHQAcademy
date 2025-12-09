@@ -219,8 +219,9 @@ export const actions = {
 				return { success: true, message: 'ユーザーIDを更新しました' };
 			}
 
-			// 何も変更がない場合
-			return fail(400, { error: '変更内容がありません。ユーザーIDまたはパスワードを変更してください' });
+			// 何も変更がない場合（エラーではなく成功として扱う）
+			console.log(`[統一ID生徒更新] ID: ${id} は変更なし`);
+			return { success: true, message: '変更はありませんでした' };
 		} catch (error) {
 			console.error('Student update error:', error);
 			return fail(500, { error: 'データベースエラーが発生しました' });
